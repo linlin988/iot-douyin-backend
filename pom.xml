@@ -11,6 +11,7 @@
     <groupId>com.iot</groupId>
     <artifactId>iot-douyin</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
     <name>iot-douyin</name>
     <description>iot-douyin</description>
     <url/>
@@ -20,6 +21,10 @@
     <developers>
         <developer/>
     </developers>
+    <modules>
+        <module>douyin-content-service</module>
+        <module>common-modules</module>
+    </modules>
     <scm>
         <connection/>
         <developerConnection/>
