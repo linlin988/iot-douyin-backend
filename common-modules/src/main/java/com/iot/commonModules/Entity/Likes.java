@@ -1,13 +1,11 @@
-package com.iot.commonmodules.Entity;
-
+package com.iot.commonModules.Entity;
 
 import lombok.Data;
 
 @Data
-public class Comments {
+public class Likes {
     private Integer id;
     private String userId;
     private String videoId;
-    private String comments;
     private String createdAt;
 }
