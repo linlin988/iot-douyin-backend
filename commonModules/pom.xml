@@ -29,6 +29,10 @@
             <scope>provided</scope> <!-- 编译时依赖，不打包 -->
         </dependency>
 
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
