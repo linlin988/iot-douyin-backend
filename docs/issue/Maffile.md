@@ -33,3 +33,10 @@ org.springframework.beans.factory.BeanDefinitionStoreException: Invalid bean def
     <version>3.5.7</version>  
 </dependency>
 ```
+
+## 问题3： “-”导致的大小写问题
+### 问题描述：  
+在拉取别人的代码合并后，发现原本的commonmodules用不了了，必须大写才能用。  
+搜索发现Maven 在编译时，会自动把 横杠 - 后面的字母变成大写
+### 解决方案：  
+将common-modules重构为commonModels，避免后续出现这种情况

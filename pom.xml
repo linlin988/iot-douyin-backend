@@ -6,13 +6,14 @@
     <groupId>com.iot</groupId>
     <artifactId>iot-douyin</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
     <name>iot-douyin</name>
     <description>iot-douyin</description>
-    <packaging>pom</packaging>
 
     <modules>
-        <module>common-modules</module>
+        <module>commonModules</module>
         <module>gateway-service</module>
+        <module>douyin-content-service</module>
     </modules>
 
     <url/>
@@ -78,7 +79,7 @@
 
             <dependency>
                 <groupId>com.iot</groupId>
-                <artifactId>common-modules</artifactId>
+                <artifactId>commonModules</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
 

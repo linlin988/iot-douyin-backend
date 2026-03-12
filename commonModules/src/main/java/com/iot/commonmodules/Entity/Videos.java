@@ -1,4 +1,4 @@
-package com.iot.commonmodules.Entity;
+package com.iot.commonModules.Entity;
 
 import lombok.Data;
 

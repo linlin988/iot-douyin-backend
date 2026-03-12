@@ -55,7 +55,7 @@
 
         <dependency>
             <groupId>com.iot</groupId>
-            <artifactId>common-modules</artifactId>
+            <artifactId>commonModules</artifactId>
             <version>0.0.1-SNAPSHOT</version>
 
         </dependency>
