@@ -9,7 +9,7 @@
         <relativePath>../pom.xml</relativePath> <!-- 指向根pom的路径 -->
     </parent>
 
-    <artifactId>common-modules</artifactId>
+    <artifactId>commonModules</artifactId>
 
     <dependencies>
         <dependency>
