@@ -1,14 +1,19 @@
+server:
+  port: 8888
 
 spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/Tiktok?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
-    username: root
-    password: 123456
-    driver-class-name: com.mysql.cj.jdbc.Driver
-
-mybatis-plus:
-  configuration:
-    map-underscore-to-camel-case: true
-  global-config:
-    db-config:
-      id-type: auto
+  application:
+    name: gateway-service
+  profiles:
+    active: dev
+  config:
+    import: optional:nacos:gateway-service-dev.yml
+  cloud:
+    nacos:
+      username: nacos
+      password: nacos
+      discovery:
+        server-addr: localhost:8848
+      config:
+        server-addr: localhost:8848
+        file-extension: yml

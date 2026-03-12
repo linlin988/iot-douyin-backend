@@ -15,73 +15,88 @@
 ## 数据库各个字段使用说明
 
 
-### videos表
-#### Integer id  
-此视频的唯一id，用于标注此视频
-#### String userId  
-用户id，用于关联视频发布者
-#### String videoUrl  
-视频地址，用于记录视频链接
-#### String coverUrl  
-封面地址，用于记录视频封面链接
-#### String title  
-视频标题，用于保存视频标题
-#### String description  
-视频描述，用于保存视频作者对于该视频的描述
-#### Integer playCount  
-视频播放量，用于记录视频被播放的次数
-#### Integer likeCount  
-视频点赞量，用于记录视频被点赞的次数
-#### String createdAt  
-视频发布时刻，用于记录视频被发布时的北京时间
+### t_comment 评论表
+#### Long id
+评论的唯一 ID，使用雪花算法生成，用于标识每条评论
+#### Long userId
+评论者 ID，逻辑关联用户表t_user的 id 字段，标识这条评论的发布者
+#### Long videoId
+被评论视频 ID，逻辑关联视频表t_video的 id 字段，标识评论所属的视频
+#### String content
+评论内容，最长支持 500 个字符，不能为空
+#### LocalDateTime createTime
+评论创建时间，数据库自动生成，记录评论发布的北京时间
+#### LocalDateTime updateTime
+评论更新时间，数据库自动刷新，记录评论最后修改时间
 
+### t_follow 关注表
+#### Long id
+关注记录的唯一 ID，雪花算法生成，用于标识每条关注关系
+#### Long followUserId
+关注者 ID（主动关注的用户），逻辑关联用户表t_user的 id
+#### Long followedUserId
+被关注者 ID（被关注的用户），逻辑关联用户表t_user的 id
+#### LocalDateTime createTime
+关注创建时间，数据库自动生成，记录关注发生的时间
+#### LocalDateTime updateTime
+关注记录更新时间，数据库自动刷新更新时刻
 
-### users表
-#### Integer id;
-此用户的唯一id，用于标注用户
-#### String username;
-用户名，此用户的展示名称
-#### String passworld;
-用户密码，此用户用于登录验证的密码
-#### String varchar;
-用户头像，用于记录用户头像地址（原本是avatar，不知道为什么粘贴成varchar了）
-#### String createdAt;
-用户账号创建时刻，用于记录用户注册时的北京时间
+### t_like 点赞表
+#### Long id
+点赞记录的唯一 ID，雪花算法生成，用于标识每条点赞行为
+#### Long userId
+点赞者 ID，逻辑关联用户表t_user的 id，标识谁点的赞
+#### Long videoId
+被点赞视频 ID，逻辑关联视频表t_video的 id，标识哪个视频被点赞
+#### LocalDateTime createTime
+点赞时间，数据库自动生成，记录点赞行为发生的时刻
+#### LocalDateTime updateTime
+点赞记录更新时间，数据库自动刷新
 
+### t_user 用户表
+#### Long id
+用户唯一 ID，雪花算法生成，用于标识每个用户
+#### String username
+用户名，用户登录使用，全局唯一，不可重复
+#### String phone
+手机号，用于注册、登录验证，全局唯一
+#### String password
+登录密码，采用 BCrypt 加密存储，不明文保存
+#### String avatar
+用户头像地址，存储 OSS 文件链接，默认使用default_avatar.png
+#### String nickname
+用户昵称，可自定义修改，用于页面展示
+#### Long followCount
+关注总数，记录该用户关注了多少人，业务层维护更新
+#### Long fanCount
+粉丝总数，记录有多少人关注该用户，业务层维护更新
+#### Long totalLiked
+获赞总数，该用户所有视频被点赞的总次数，业务层维护更新
+#### LocalDateTime createTime
+账号注册时间，数据库自动生成
+#### LocalDateTime updateTime
+用户信息更新时间，数据库自动刷新
 
-### comments表
-#### Integer id;
-该评论的唯一id，用于标记该评论
-#### String userId;
-评论的用户id，用于记录该评论的发布者
-#### String videoId;
-评论的视频id，用于记录该评论属于哪个视频
-#### String comments;
-评论内容，用于记录评论的内容
-#### String createdAt;
-评论创建时刻，用于记录评论创建的北京时间
-
-
-### follows表
-#### Integer id;
-此条关注信息的唯一id，用于标记该关注信息
-#### String userId;
-用户id，用于记录此条信息的主人
-#### String followerId;
-关注者（粉丝）id，用于记录粉丝的id（一般与userId相同）
-#### String followeeId;
-被关注者（博主）id，用于记录博主的id
-#### String createdAt;
-此条关注信息创建时刻，用于记录此条信息创建的北京时间
-
-
-### likes表
-#### Integer id;
-此条点赞信息的唯一id，用于标记该点赞信息
-#### String userId;
-用户id，用于记录点赞者的id
-#### String videoId;
-视频id，用于记录被点赞视频的id
-#### String createdAt;
-此条关注信息创建时刻，用于记录此条信息创建的北京时间
-
+### t_video 视频表
+#### Long id
+视频唯一 ID，雪花算法生成，用于标识每个视频
+#### Long userId
+视频发布者 ID，逻辑关联用户表t_user的 id
+#### String title
+视频标题，支持模糊搜索，最长 100 字符
+#### String description
+视频描述信息，可空，最长 500 字符
+#### String videoUrl
+视频播放地址，存储 OSS 文件链接
+#### String coverUrl
+视频封面图片地址，存储 OSS 文件链接
+#### Long likeCount
+视频点赞总数，业务层实时维护更新
+#### Long playCount
+视频播放次数，用户每次打开视频时业务层 + 1
+#### Long commentCount
+视频评论总数，业务层实时维护更新
+#### LocalDateTime createTime
+视频发布时间，数据库自动生成
+#### LocalDateTime updateTime
+视频信息更新时间，数据库自动刷新

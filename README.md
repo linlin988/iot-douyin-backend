@@ -1,6 +1,7 @@
 # 前言
-#### 大家可以将自己每次的大改写入文档。  
-然后大家有想法也可以改这些说明文档，大家改得越多我们项目才越完善，同时也可以提升我们协作的效率。
+#### 大家可以将自己每次的重大更新写入这里。  
+将spring boot 版本改为3.0.13  
+
 # 开发规范
 ### 仓库与分支规范：
 建公共 Git 仓库（Public）  
@@ -66,4 +67,26 @@ reasonable: true
 支持count查询优化
 optimize-count-sql: true
 # 使用说明
-目前项目未完成。
+## commonModules和gateway相关使用说明
+### commonModules
+Jwt： 看JwtUtils里的注解  
+Result： 看Result里的注解
+### gateway
+#### Nacos： 
+```text
+1.在nacos官网下载3.1.1版本的nacos
+2.将conf目录下的application.properties里的secret.key赋值VGhpc0lzTXlDdXN0b21TZWNyZXRLZXkwMTIzNDU2Nzg=  
+3.在conf目录下的application.properties里的最下面新增：
+nacos.core.auth.enabled=true
+nacos.core.auth.server.identity.key=nacos
+nacos.core.auth.server.identity.value=nacos
+4.将bin目录下的set MODE改为"standalone"
+现在就可以启动了，注意第三点的nacos就是你的本地登录账号密码
+```
+启动成功后在下面的路径获取配置压缩包，解压后导入nacos就能统一配置
+```text
+src/main/java/com/iot/gatewayservice/config/nacos/nacos_config_export_20260312223235.zip
+```
+本地有新增配置还请上传代码时附带一起提交，如果有更好的统一配置方法欢迎交流  
+接下来只需要在网关路由下加入你的子服务名称，路径，断言即可被网关统一转发。  
+##### 注：由于没有测试，目前不知道有没有bug

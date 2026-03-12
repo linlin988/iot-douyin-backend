@@ -39,7 +39,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>3.3.5</version>
+                <version>3.0.13</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -81,6 +81,13 @@
                 <groupId>com.iot</groupId>
                 <artifactId>commonModules</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+
+            <!-- jwt -->
+            <dependency>
+                <groupId>com.auth0</groupId>
+                <artifactId>java-jwt</artifactId>
+                <version>4.4.0</version>
             </dependency>
 
         </dependencies>
