@@ -28,6 +28,12 @@
             <artifactId>lombok</artifactId>
             <scope>provided</scope> <!-- 编译时依赖，不打包 -->
         </dependency>
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-core</artifactId>
+            <version>3.5.7</version>
+            <scope>compile</scope>
+        </dependency>
 
     </dependencies>
 
