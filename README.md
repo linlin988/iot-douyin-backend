@@ -44,9 +44,10 @@ src/main/java/com/iot/gatewayservice/config/nacos/nacos_config_export_2026031222
 ```
 本地有新增配置还请上传代码时附带一起提交，如果有更好的统一配置方法欢迎交流  
 接下来只需要在网关路由下加入你的子服务名称，路径，断言即可被网关统一转发。  
-
-##### 注：每次拉取更新时请手动导入最新nacos配置
-
+docker nacos 3.1.1启动：
+```text 
+docker run -d   --name nacos   -p 8080:8080   -p 8848:8848   -p 9848:9848   -p 9849:9849   -e MODE=standalone   -e JVM_XMS=256m   -e JVM_XMX=256m   -e NACOS_AUTH_TOKEN=VGhpc0lzTXlDdXN0b21TZWNyZXRLZXkwMTIzNDU2Nzg=   -e NACOS_AUTH_IDENTITY_KEY=nacos   -e NACOS_AUTH_IDENTITY_VALUE=nacos   -e NACOS_AUTH_ENABLE=true   -e NACOS_AUTH_API_COMPATIBILITY=false   --restart=always   nacos/nacos-server:v3.1.1
+```
 
 
 ## 二、mybatis_plus配置参考
