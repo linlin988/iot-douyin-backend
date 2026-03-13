@@ -23,8 +23,9 @@ docs: 补充接口文档
 # 使用说明
 ## 一、commonModules和gateway相关使用说明
 ### commonModules
--Jwt： 看JwtUtils里的注解  
--Result： 看Result里的注解
+- Jwt： 看JwtUtils里的注解  
+- Result： 看Result里的注解  
+- Captcha： 看captchaConfig里的注解
 ### gateway
 #### Nacos： 
 ```text
@@ -43,7 +44,9 @@ src/main/java/com/iot/gatewayservice/config/nacos/nacos_config_export_2026031222
 ```
 本地有新增配置还请上传代码时附带一起提交，如果有更好的统一配置方法欢迎交流  
 接下来只需要在网关路由下加入你的子服务名称，路径，断言即可被网关统一转发。  
-##### 注：由于没有测试，目前不知道有没有bug
+
+##### 注：每次拉取更新时请手动导入最新nacos配置
+
 
 
 ## 二、mybatis_plus配置参考

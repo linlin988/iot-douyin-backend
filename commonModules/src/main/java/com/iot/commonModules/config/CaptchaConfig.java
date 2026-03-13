@@ -19,7 +19,7 @@ import java.util.Properties;
           captchaService.captcha(loginRequest,response);
     }
 
-    具体看一看testForMaffile里面的UserTestController
+    具体看一看testForMaffile里面的UserTestController，里面有测试类
 
  */
 
