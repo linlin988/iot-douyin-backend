@@ -1,4 +1,4 @@
-package com.iot.commonmodules.Utils.Result;
+package com.iot.commonModules.common;
 
 
 import lombok.AllArgsConstructor;

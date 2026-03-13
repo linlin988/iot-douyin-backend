@@ -40,3 +40,12 @@ org.springframework.beans.factory.BeanDefinitionStoreException: Invalid bean def
 搜索发现Maven 在编译时，会自动把 横杠 - 后面的字母变成大写
 ### 解决方案：  
 将common-modules重构为commonModels，避免后续出现这种情况
+
+## 问题4： kaptcha与springboot3的部分兼容性问题
+### 问题描述：
+用kaptcha写serviceImpl时自动导入的是javax下的servlet，但使用过程中会报错  
+搜索发现Spring Boot 3.x 已经完全迁移到 Jakarta EE 9+ 规范，Servlet API 的包名从 javax.servlet 改成了 jakarta.servlet。  
+于是我改用Jakarta，但是唯独imageio.ImageIO;无法导入  
+进一步搜索发现Jakarta根本没有这个工具  
+### 解决方案：
+除import javax.imageio.ImageIO;外都采用Jakarta包

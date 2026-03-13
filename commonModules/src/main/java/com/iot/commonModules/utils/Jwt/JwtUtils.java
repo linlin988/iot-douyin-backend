@@ -1,4 +1,4 @@
-package com.iot.commonmodules.Utils.Jwt;
+package com.iot.commonModules.utils.Jwt;
 
 
 import com.auth0.jwt.JWT;
