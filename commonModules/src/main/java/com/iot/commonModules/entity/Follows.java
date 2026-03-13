@@ -1,44 +1,38 @@
-package com.iot.commonModules.Entity;
+package com.iot.commonModules.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
-import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 评论表
- * @TableName t_comment
+ * 关注表
+ * @TableName t_follow
  */
 @Data
-@TableName(value = "t_comment")
-public class Comments implements Serializable {
+@TableName(value = "t_follow")
+public class Follows implements Serializable {
     /**
-     * 评论ID，雪花算法
+     * 关注记录ID，雪花算法
      */
     @TableId(type = IdType.ASSIGN_ID)
     private Long id;
 
     /**
-     * 评论者ID，关联t_user.id
+     * 关注者ID，关联t_user.id
      */
-    @TableField(value = "user_id")
-    private Long userId;
+    @TableField(value = "follow_user_id")
+    private Long followUserId;
 
     /**
-     * 被评论视频ID，关联t_video.id
+     * 被关注者ID，关联t_user.id
      */
-    @TableField(value = "video_id")
-    private Long videoId;
+    @TableField(value = "followed_user_id")
+    private Long followedUserId;
 
     /**
-     * 评论内容
-     */
-    private String content;
-
-    /**
-     * 评论时间
+     * 关注时间
      */
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;

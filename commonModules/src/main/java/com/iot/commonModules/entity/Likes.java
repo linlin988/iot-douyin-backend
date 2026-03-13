@@ -1,7 +1,6 @@
-package com.iot.commonModules.Entity;
+package com.iot.commonModules.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
-import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import lombok.Data;
 
 import java.io.Serializable;
