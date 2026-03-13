@@ -95,3 +95,17 @@ enable: true
 reasonable: true
 支持count查询优化
 optimize-count-sql: true
+
+# 3.knife4j:
+## 接口文档的配置，
+## 引入依赖，写入yml后即可通过注解生成接口文档
+#### 开启增强模式
+enable: true
+#### 标题
+title: iot-douyin-backend接口文档
+#### 描述
+description: 后端接口文档
+#### 联系人
+contact: 开发者
+#### 版本号
+version: 1.0

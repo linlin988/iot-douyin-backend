@@ -105,6 +105,13 @@
                 <version>3.16.0</version>
             </dependency>
 
+            <!--hutool,这里面有各种各样的工具，很好用-->
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-all</artifactId>
+                <version>5.7.17</version>
+            </dependency>
+
 
         </dependencies>
 
