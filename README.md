@@ -1,7 +1,7 @@
 # 前言
 #### 大家可以将自己每次的重大更新写入这里。  
-将spring boot 版本改为3.0.13  
-
+将 spring boot 版本改为3.0.13  
+将 nacos 版本改为2.2.1
 # 开发规范
 ### 仓库与分支规范：
 建公共 Git 仓库（Public）  
@@ -28,26 +28,12 @@ docs: 补充接口文档
 - Captcha： 看captchaConfig里的注解
 ### gateway
 #### Nacos： 
+docker启动nacos：
 ```text
-1.在nacos官网下载3.1.1版本的nacos
-2.将conf目录下的application.properties里的secret.key赋值VGhpc0lzTXlDdXN0b21TZWNyZXRLZXkwMTIzNDU2Nzg=  
-3.在conf目录下的application.properties里的最下面新增：
-nacos.core.auth.enabled=true
-nacos.core.auth.server.identity.key=nacos
-nacos.core.auth.server.identity.value=nacos
-4.将bin目录下的set MODE改为"standalone"
-现在就可以启动了，注意第三点的nacos就是你的本地登录账号密码
+docker run -d --name nacos -e MODE=standalone -e NACOS_AUTH_ENABLE=true -e NACOS_AUTH_IDENTITY_KEY=serverIdentityKey1234567890abcdef -e NACOS_AUTH_IDENTITY_VALUE=serverIdentityValue9876543210fedcba -e NACOS_AUTH_TOKEN=VGhpc0lzTXlDdXN0b21TZWNyZXRLZXkwMTIzNDU2Nzg= -p 8848:8848 -p 9848:9848 nacos/nacos-server:v2.2.1
 ```
-启动成功后在下面的路径获取配置压缩包，解压后导入nacos就能统一配置
-```text
-src/main/java/com/iot/gatewayservice/config/nacos/nacos_config_export_20260312223235.zip
-```
-本地有新增配置还请上传代码时附带一起提交，如果有更好的统一配置方法欢迎交流  
-接下来只需要在网关路由下加入你的子服务名称，路径，断言即可被网关统一转发。  
-docker nacos 3.1.1启动：
-```text 
-docker run -d   --name nacos   -p 8080:8080   -p 8848:8848   -p 9848:9848   -p 9849:9849   -e MODE=standalone   -e JVM_XMS=256m   -e JVM_XMX=256m   -e NACOS_AUTH_TOKEN=VGhpc0lzTXlDdXN0b21TZWNyZXRLZXkwMTIzNDU2Nzg=   -e NACOS_AUTH_IDENTITY_KEY=nacos   -e NACOS_AUTH_IDENTITY_VALUE=nacos   -e NACOS_AUTH_ENABLE=true   -e NACOS_AUTH_API_COMPATIBILITY=false   --restart=always   nacos/nacos-server:v3.1.1
-```
+使用公网访问nacos，账号密码都是nacos。  
+
 
 
 ## 二、mybatis_plus配置参考
