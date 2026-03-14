@@ -28,10 +28,6 @@
             <artifactId>lombok</artifactId>
             <scope>provided</scope> <!-- 编译时依赖，不打包 -->
         </dependency>
-        <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-core</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>com.auth0</groupId>
@@ -60,17 +56,25 @@
             <artifactId>commons-pool2</artifactId>
         </dependency>
 
-        <!--  OpenAPI Knife4j 集成 Swagger接口文档  -->
-        <dependency>
-            <groupId>com.github.xiaoymin</groupId>
-            <artifactId>knife4j-openapi3-spring-boot-starter</artifactId>
-        </dependency>
+
 
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
             <version>6.0.0</version>  <!-- Spring Boot 3 默认用 6.0.x，SB 3.2+ 可到 6.1.0 -->
             <scope>provided</scope>   <!-- 关键！编译时用，运行时由容器（如 Tomcat 10+）提供 -->
+        </dependency>
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-core</artifactId>
+            <version>3.5.7</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-extension</artifactId>
+            <version>3.5.7</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

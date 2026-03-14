@@ -90,11 +90,12 @@ configuration:
 plugin:
 pagination:
 #### 开启分页插件
-enable: true
-分页合理化：页码超出范围时自动修正（如页码<1则查第1页，>总页数则查最后一页）
-reasonable: true
-支持count查询优化
-optimize-count-sql: true
+### 分页查询使用方法
+ 1.分页查询，new Page()的两个参数分别是：页码、每页大小
+Page<User> p = userService.page(new Page<>(2, 2));
+
+List<User> records = p.getRecords();
+
 
 # 3.knife4j:
 ## 接口文档的配置，
@@ -109,3 +110,4 @@ description: 后端接口文档
 contact: 开发者
 #### 版本号
 version: 1.0
+
