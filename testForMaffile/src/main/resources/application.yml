@@ -5,7 +5,7 @@ spring:
   profiles:
     active: dev
   config:
-    import: optional:nacos:testForMaffile-dev.yml
+    import: nacos:testForMaffile-dev.yml
   cloud:
     nacos:
       username: nacos

@@ -2,6 +2,37 @@
 #### 大家可以将自己每次的重大更新写入这里。  
 将 spring boot 版本改为3.0.13  
 将 nacos 版本改为2.2.1
+
+### nacos访问
+```http request
+http://121.41.228.22:8848/nacos
+```
+### redis连接
+```json
+[
+    
+    {
+        "auth": "123456",
+        "host": "121.41.228.22",
+        "keys_pattern": "*",
+        "name": "tiktok",
+        "namespace_separator": ":",
+        "port": 6379,
+        "ssh_port": 22,
+        "timeout_connect": 60000,
+        "timeout_execute": 60000
+    }
+]
+```
+
+### mysql连接
+```text
+hostname: 121.41.228.22
+username: remote
+password: 123456
+port: 3306
+```
+##### 注：如果一个账号不能多台机器共用请联系管理员
 # 开发规范
 ### 仓库与分支规范：
 建公共 Git 仓库（Public）  
