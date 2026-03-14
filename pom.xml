@@ -103,13 +103,12 @@
                 <version>3.16.0</version>
             </dependency>
 
-            <!--map转json-->
+            <!--hutool,这里面有各种各样的工具，很好用-->
             <dependency>
-                <groupId>com.alibaba</groupId>
-                <artifactId>fastjson</artifactId>
-                <version>1.2.83</version>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-all</artifactId>
+                <version>5.8.32</version>
             </dependency>
-
 
 
         </dependencies>
