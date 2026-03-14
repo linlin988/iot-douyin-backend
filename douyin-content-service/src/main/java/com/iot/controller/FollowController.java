@@ -1,5 +1,6 @@
 package com.iot.controller;
 
+import com.iot.commonModules.DTO.pageQuery;
 import com.iot.commonModules.common.Result;
 
 import com.iot.service.IFollowService;
@@ -31,18 +32,40 @@ public class FollowController {
        return followService.add(followedUserId,follow);
     }
 
-
+    /**
+     * 查询是否关注
+     * @param followedUserId
+     * @return
+     */
     @Operation(summary = "查询是否关注")
     @GetMapping("/queryFollow/{id}")
-    public Result queryFollow(Long followedUserId){
+    public Result queryFollow(@PathVariable Long followedUserId){
         return followService.queryFollow(followedUserId);
     }
 
-
-   @GetMapping("/list")
-    public Result list(Long UserId){
-        return null;
+    /**
+     * 分页查询我的关注列表
+     * @param pageQuery
+     * @return
+     */
+   @Operation(summary = "分页查询我的关注列表")
+   @GetMapping("/followList")
+   public Result followList(pageQuery pageQuery){
+       return followService.getMyFollowList(pageQuery);
    }
+
+   /**
+    * 分页查询我的粉丝列表
+    * @param pageQuery
+    * @return
+    */
+   @Operation(summary = "分页查询我的粉丝列表")
+   @GetMapping("/fansList")
+   public Result fansList(pageQuery pageQuery){
+       return followService.getMyFansList(pageQuery);
+   }
+
+
 
 
 
