@@ -1,5 +1,7 @@
 package com.iot.gatewayservice.config;
 
+
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -16,7 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.alibaba.fastjson.JSON;
+
 
 
 @Component
@@ -28,6 +30,7 @@ public class GlobalFilterConfig implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         // 1. 获取请求
+        System.out.println("========== 过滤器执行了 ==========");
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getPath().toString();
 
@@ -49,7 +52,12 @@ public class GlobalFilterConfig implements GlobalFilter, Ordered {
             return responseFail(exchange, "登录已过期");
         }
 
-        // 5. 放行
+        // 5. 放行前，标记是从网关进来的请求
+        ServerHttpRequest mutatedRequest = request.mutate()
+                .header("iot-Gateway-Request", "internal-gateway-123456")
+                .build();
+        exchange = exchange.mutate().request(mutatedRequest).build();
+
         return chain.filter(exchange);
     }
 
