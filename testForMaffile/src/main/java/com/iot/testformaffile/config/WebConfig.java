@@ -16,7 +16,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "/login",
                         "/captcha",
                         "/actuator/**",
-                        "/error"
+                        "/error",
+                        "/test/exception"
                 );
     }
 }

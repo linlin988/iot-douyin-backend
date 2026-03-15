@@ -1,8 +1,11 @@
 package com.iot.gatewayservice.config;
 
 
+import cn.hutool.core.text.AntPathMatcher;
 import com.alibaba.fastjson.JSON;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import org.springframework.util.StringUtils;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -15,27 +18,31 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-
-
+import java.util.*;
 
 
 @Component
 public class GlobalFilterConfig implements GlobalFilter, Ordered {
 
     @Autowired
+    private GatewayAuthProperties authProperties;
+
+    @Autowired
     private RedisTemplate<String, Object> redisTemplate;
+
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         // 1. 获取请求
         System.out.println("========== 过滤器执行了 ==========");
         ServerHttpRequest request = exchange.getRequest();
-        String path = request.getPath().toString();
+        String path = request.getURI().getPath();
+        System.out.println("请求路径: " + path);
+        System.out.println("白名单列表: " + authProperties.getWhiteList());  // 或 authProperties.getWhiteList()
 
         // 2. 放行登录、验证码接口
-        if (path.contains("/login") || path.contains("/captcha")) {
+        if (isWhiteListed(path)) {
             return chain.filter(exchange);
         }
 
@@ -59,6 +66,13 @@ public class GlobalFilterConfig implements GlobalFilter, Ordered {
         exchange = exchange.mutate().request(mutatedRequest).build();
 
         return chain.filter(exchange);
+    }
+
+    private boolean isWhiteListed(String path) {
+        if (authProperties.getWhiteList() == null || authProperties.getWhiteList().isEmpty()) {
+            return false;
+        }
+        return authProperties.getWhiteList().stream().anyMatch(pattern -> pathMatcher.match(pattern.trim(), path));
     }
 
     // 返回错误信息

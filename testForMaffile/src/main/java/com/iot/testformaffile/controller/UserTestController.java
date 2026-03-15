@@ -25,4 +25,10 @@ public class UserTestController {
     public String test(){
         return "test";
     }
+
+    @GetMapping("/exception")
+    public String throwException() {
+        throw new RuntimeException("这是一个测试全局异常的 RuntimeException");  // 或自定义异常
+        // return "ok";  // 正常不会走到这里
+    }
 }

@@ -107,3 +107,20 @@ https://blog.csdn.net/weixin_30598047/article/details/148537243?ops_request_misc
 也就是说我之前不优雅的删除nacos容器（应该不是这个原因，毕竟后面删除也不优雅）或者由于触发了oom或gc异常导致nacos异常停止损坏了Derby的data，而再次运行nacos容器是不会重构derby-data的    
 ###### 我再仔细看了看ai对于日志的分析，其中有提到derby数据库启动失败/超时，但并未给出正确解决方案，只是不断修改参数并重复删除-启动容器
 ##### 方案：进入docker/../derby-data文件夹，将他删掉再重启nacos即可
+
+## 问题8：yml配置的读取问题
+### 问题描述：
+在配置全局过滤器时，我想在nacos配置里面添加白名单
+直接使用@value注解发现读取到的列表为空  
+### 解决方案：
+新建一个配置类，通过"@ConfigurationProperties"注解获取配置
+```java
+@Component
+@ConfigurationProperties(prefix = "gateway.auth")
+@Data
+public class GatewayAuthProperties {
+
+    private List<String> whiteList = new ArrayList<>();
+}
+```
+最后再在过滤器里面注入即可
