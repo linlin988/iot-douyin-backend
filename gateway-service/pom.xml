@@ -48,12 +48,6 @@
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
-        <!--  OpenAPI Knife4j 集成 Swagger接口文档  -->
-        <dependency>
-            <groupId>com.github.xiaoymin</groupId>
-            <artifactId>knife4j-openapi3-spring-boot-starter</artifactId>
-            <version>4.1.0</version>
-        </dependency>
 
         <dependency>
             <groupId>com.alibaba.cloud</groupId>

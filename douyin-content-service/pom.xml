@@ -55,13 +55,6 @@
       </dependency>
 
 
-      <dependency>
-          <groupId>io.swagger.core.v3</groupId>
-          <artifactId>swagger-annotations</artifactId>
-          <version>2.2.8</version>
-          <scope>compile</scope>
-      </dependency>
-
       <!-- SpringBoot 3.x MySQL 8.0+ 驱动 -->
       <dependency>
           <groupId>com.mysql</groupId>
@@ -69,10 +62,17 @@
           <scope>runtime</scope>
       </dependency>
 
+      <!-- Spring Boot 3.x + OpenAPI3 + Jakarta 唯一正确依赖 -->
+      <dependency>
+          <groupId>com.github.xiaoymin</groupId>
+          <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+          <version>4.5.0</version>
+      </dependency>
+
   </dependencies>
     <properties>
-        <maven.compiler.source>25</maven.compiler.source>
-        <maven.compiler.target>25</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 

@@ -11,15 +11,29 @@ spring:
     username: root
     password: 205501
   jackson:
-    default-property-inclusion: non_null # JSON处理时忽略非空字段
+    default-property-inclusion: non_null # JSON 处理时忽略非空字段
 
+mybatis-plus:
+  type-aliases-package: com.iot.commonModules.entity # 别名扫描包
+
+# Knife4j 配置 (SpringDoc OpenAPI)
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn  # 中文界面
 
 #  redis:
 #      port: 6379
 #      password: redis102425Abcd@
 #      host: 127.0.0.1
-mybatis-plus:
-  type-aliases-package: com.iot.commonModules.entity # 别名扫描包
+
 logging:
   level:
     com.content: debug

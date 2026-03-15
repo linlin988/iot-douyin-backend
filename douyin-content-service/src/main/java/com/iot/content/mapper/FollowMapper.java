@@ -1,4 +1,4 @@
-package com.iot.mapper;
+package com.iot.content.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.iot.commonModules.entity.Follows;

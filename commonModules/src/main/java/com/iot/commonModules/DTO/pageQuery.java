@@ -11,9 +11,9 @@ import lombok.Data;
 public class pageQuery {
 
 
-    @Schema(description = "页码")
+    @Schema(description = "页码",defaultValue = "1")
     private Long pageNo;
-    @Schema(description = "页码")
+    @Schema(description = "页大小",defaultValue = "10")
     private Long pageSize;
     @Schema(description = "排序字段")
     private String sortBy;
@@ -21,11 +21,14 @@ public class pageQuery {
     private Boolean isAsc;
 
 
-    //前端pageQuery 转换为 MybatisPlus Page（可以进行查询）
-
+    //前端 pageQuery 转换为 MybatisPlus Page（可以进行查询）
+    
     public <T> Page<T> toMpPage(OrderItem... orders){
-        // 1.分页条件
-        Page<T> p = Page.of(pageNo, pageSize);
+        // 1.分页条件 - 处理 null 值，提供默认值
+        long pageNum = pageNo != null ? pageNo : 1L;  // 默认第 1 页
+        long pageSizeVal = pageSize != null ? pageSize : 10L;  // 默认每页 10 条
+            
+        Page<T> p = Page.of(pageNum, pageSizeVal);
         // 2.排序条件
         // 2.1.先看前端有没有传排序字段
         if (sortBy != null) {
