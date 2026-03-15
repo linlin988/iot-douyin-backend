@@ -53,15 +53,30 @@ public class GlobalFilterConfig implements GlobalFilter, Ordered {
             return responseFail(exchange, "请先登录");
         }
 
-        // 4. 校验 Redis 中是否存在（所有微服务共享 Redis，直接校验）
-        Boolean hasKey = redisTemplate.hasKey("login:" + token);
+        // 4.校验 Redis
+        String redisKey = "login:" + token;
+        System.out.println("ru-token:" + redisKey);
+        Boolean hasKey = redisTemplate.hasKey(redisKey);
         if (hasKey == null || !hasKey) {
             return responseFail(exchange, "登录已过期");
         }
 
-        // 5. 放行前，标记是从网关进来的请求
+
+        // 5.从 Redis 获取用户信息
+        String userId = (String) redisTemplate.opsForHash().get(redisKey, "userId");
+        String username = (String) redisTemplate.opsForHash().get(redisKey, "username");
+;
+
+        if (userId == null) {
+            return responseFail(exchange, "用户信息异常");
+        }
+
+        // 6. 放行前，标记是从网关进来的请求
+        // 附加到请求头（子服务可直接读取）
         ServerHttpRequest mutatedRequest = request.mutate()
-                .header("iot-Gateway-Request", "internal-gateway-123456")
+                .header("iot-User-Id", userId)          // 用户 ID
+                .header("iot-User-Name", username != null ? username : "")  // 用户名（如果有）
+                .header("iot-Gateway-Request", "internal-gateway-123456")  // 保留原有
                 .build();
         exchange = exchange.mutate().request(mutatedRequest).build();
 
@@ -77,7 +92,7 @@ public class GlobalFilterConfig implements GlobalFilter, Ordered {
 
     // 返回错误信息
     private Mono<Void> responseFail(ServerWebExchange exchange, String msg) {
-        // 这里你可以用你那个 ResultCodeEnum 枚举
+        // 这里可以用 枚举
         Map<String, Object> map = new HashMap<>();
         map.put("code", 401);
         map.put("message", msg);
