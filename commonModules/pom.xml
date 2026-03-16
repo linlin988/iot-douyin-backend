@@ -65,6 +65,13 @@
             <scope>provided</scope>   <!-- 关键！编译时用，运行时由容器（如 Tomcat 10+）提供 -->
         </dependency>
 
+        <!-- Spring Boot 3.x + OpenAPI3 + Jakarta 唯一正确依赖 -->
+        <dependency>
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+            <version>4.5.0</version>
+        </dependency>
+
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-core</artifactId>
@@ -79,17 +86,13 @@
             <scope>compile</scope>
         </dependency>
 
-        <dependency>
-            <groupId>io.swagger.core.v3</groupId>
-            <artifactId>swagger-annotations</artifactId>
-            <version>2.2.8</version>
-            <scope>compile</scope>
-        </dependency>
 
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
         </dependency>
+
+
     </dependencies>
 
     <build>

@@ -43,6 +43,4 @@ public class Follows implements Serializable {
     @TableField(fill = FieldFill.UPDATE, update = "now()")
     private LocalDateTime updateTime;
 
-    @TableField(exist = false)
-    private static final long serialVersionUID = 1L;
 }

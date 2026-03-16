@@ -1,4 +1,4 @@
-package com.iot.commonModules.VO;
+package com.iot.content.VO;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

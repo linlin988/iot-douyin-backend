@@ -110,21 +110,22 @@
                 <version>5.8.32</version>
             </dependency>
 
+            <!-- Spring Boot 3.x + OpenAPI3 + Jakarta 唯一正确依赖 -->
+            <dependency>
+                <groupId>com.github.xiaoymin</groupId>
+                <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+                <version>4.5.0</version>
+            </dependency>
+          
             <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>fastjson</artifactId>
                 <version>1.2.83</version>
             </dependency>
 
-            <!--  OpenAPI Knife4j 集成 Swagger接口文档  -->
-            <dependency>
-                <groupId>com.github.xiaoymin</groupId>
-                <artifactId>knife4j-openapi3-spring-boot-starter</artifactId>
-                <version>4.1.0</version>
-            </dependency>
-
 
         </dependencies>
+
 
 
     </dependencyManagement>
