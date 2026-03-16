@@ -5,13 +5,13 @@ spring:
   profiles:
     active: dev
   config:
-    import: optional:nacos:testForMaffile-dev.yml
+    import: nacos:testForMaffile-dev.yml
   cloud:
     nacos:
       username: nacos
       password: nacos
       discovery:
-        server-addr: localhost:8848
+        server-addr: 121.41.228.22:8848
       config:
-        server-addr: localhost:8848
+        server-addr: 121.41.228.22:8848
         file-extension: yml
