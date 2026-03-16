@@ -8,6 +8,7 @@ import com.iot.commonModules.DTO.pageQuery;
 import com.iot.commonModules.common.Result;
 import com.iot.commonModules.entity.Follows;
 import com.iot.commonModules.entity.User;
+import com.iot.commonModules.utils.UserContext;
 import com.iot.content.VO.FollowsVO;
 import com.iot.content.service.IFollowService;
 import com.iot.content.mapper.FollowMapper;
@@ -27,10 +28,16 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper,Follows> impleme
     @Resource
     UserMapper userMapper;
 
+    /**
+     * 添加关注或取消关注
+     * @param followedUserId 被关注用户ID
+     * @param follow 是否关注
+     * @return
+     */
     public Result add(Long followedUserId, Boolean follow) {
 
         //获取当前用户id
-        Long followUserId = 1L;
+        Long followUserId = UserContext.getUser();
 
         //1.根据follow确定是否关注
         if (follow) {
@@ -54,7 +61,7 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper,Follows> impleme
     @Override
     public Result queryFollow(Long followedUserId) {
             // 1.获取登录用户
-            Long followUserId = 1L;//TODO JWT TOKEN
+            Long followUserId = UserContext.getUser();
             // 2.查询是否关注 select count(*) from tb_follow where user_id = ? and follow_user_id = ?
             Integer count = Math.toIntExact(query().eq("follow_user_id", followUserId)
                     .eq("followed_user_id", followedUserId).count());
@@ -69,7 +76,7 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper,Follows> impleme
     @Override
     public Result getMyFollowList(pageQuery pageQuery) {
         // 1.获取当前登录用户
-        Long followUserId = 1L; // TODO: 实际应从 JWT token 中获取
+        Long followUserId = UserContext.getUser();
         
         // 2.构建分页对象，使用默认按创建时间倒序排序
         Page<Follows> page = pageQuery.toMpPageDefaultSortByCreateTimeDesc();
@@ -119,7 +126,7 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper,Follows> impleme
     @Override
     public Result getMyFansList(pageQuery pageQuery) {
         // 1.获取当前登录用户
-        Long followUserId = 1L; // TODO: 实际应从 JWT token 中获取
+        Long followUserId = UserContext.getUser();
 
         // 2.构建分页对象，使用默认按创建时间倒序排序
         Page<Follows> page = pageQuery.toMpPageDefaultSortByCreateTimeDesc();
@@ -159,7 +166,7 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper,Follows> impleme
      */
     @Override
     public Result getFollowCountByUserId() {
-        Long userId = 1L;
+        Long userId = UserContext.getUser();
         Integer count = userMapper.queryFollowCount(userId);
         return Result.success(count);
     }
@@ -170,7 +177,7 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper,Follows> impleme
      */
     @Override
     public Result getFansCountByUserId() {
-        Long userId = 1L;
+        Long userId = UserContext.getUser();
         Integer count = userMapper.queryFansCount(userId);
         return Result.success(count);
     }

@@ -10,4 +10,6 @@ public interface ICommentService extends IService<Comments> {
     Result deleteComment(Long videoId);
 
     Result listComment(Long videoId, pageQuery pageQuery);
+
+    Result addComment(CommentDTO commentDTO);
 }

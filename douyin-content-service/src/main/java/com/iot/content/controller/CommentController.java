@@ -26,15 +26,7 @@ public class CommentController {
     @PostMapping("/add")
     @Schema(description = "发布评论")
     public Result addComment(@RequestBody CommentDTO commentDTO){
-        Long userId=1l;
-
-        if (StrUtil.isBlank(commentDTO.getContent())) {
-            Comments comments = BeanUtil.copyProperties(commentDTO, Comments.class);
-            Boolean result = commentService.save(comments);
-            return Result.success(result);
-        }else{
-            return Result.error(400, "评论内容不能为空");
-        }
+        return commentService.addComment(commentDTO);
     }
 
     @DeleteMapping("/delete/{id}")
@@ -46,9 +38,7 @@ public class CommentController {
     @GetMapping("/list/{id}")
     @Schema(description = "获取当前评论列表")
     public Result listComment(
-            @PathVariable("id") @Parameter(description = "视频 ID") Long videoId,
-            @ModelAttribute pageQuery pageQuery
-    ){
+            @PathVariable("id") Long videoId, @RequestBody pageQuery pageQuery){
         return commentService.listComment(videoId, pageQuery);
     }
 
