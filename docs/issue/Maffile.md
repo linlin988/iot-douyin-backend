@@ -6,7 +6,7 @@
 后面调具体日志才发现我的电脑同时安装了JDK25和JDK17，而idea一直在用JDK25  
 ### 解决方案：
 在系统变量中设置
-```
+```text
 JAVA_HOME17  ： 路径
 JAVA_HOME25  ： 路径
 JAVA_HOME : %JAVA_HOME17%\bin
@@ -49,3 +49,78 @@ org.springframework.beans.factory.BeanDefinitionStoreException: Invalid bean def
 进一步搜索发现Jakarta根本没有这个工具  
 ### 解决方案：
 除import javax.imageio.ImageIO;外都采用Jakarta包
+
+## 问题5： spring-cloud2022与nacos3.1.1的兼容性问题
+### 问题描述：
+由于之前在本地使用nacos3.1.1与spring-cloud2022可以正常启动，在服务器部署nacos时也选用了3.1.1  
+但是部署后发现很多问题：  
+- 3.1版本将web与后端分离，一个是8080，一个是8848，两个端口都得做映射  
+- 3.1版本鉴权严重，key和keyvalue为必须项，还得传生成token的公钥
+- nacos启动需要十多秒
+- 在我的电脑上可以访问8080，8848，在服务器也显示nacos8848运行中，但是springboot始终无法加载配置文件，不断返回500
+### 解决方案：
+最开始想着将就使用3.1.1，于是在启动时设置不进行版本兼容检验，最后发现还是不兼容  
+于是乎改用nacos2.1.1，没有3.1.1那么复杂，启动还迅速，很适合我们的版本  
+
+## 问题6： 阿里云服务器连接问题
+### 问题描述：
+在使用阿里云workbench连接服务器时，经常用着用着服务器便卡死，无法输入任何命令  
+此时调用vnc也无法操作  
+重启服务器又要花十来分钟，效率难以启齿
+### 解决方案：
+经过不断的查帖子，发现很有可能是服务器触发oom或者gc异常  
+触发后由于无法向服务器发送任何命令，因此我们选择强制关机（断电）  
+开机后可正常运行，此时我们运行docker容器时要加以限制，如-e JVM_XMX=256m ，避免再次死机  
+
+## 问题7： docker部署nacos的一系列问题
+### 问题描述：
+按照ai给的启动方案：
+```shell
+docker run -d \
+--name nacos \
+-p 8848:8848 \
+-p 9849:9849 \
+-e MODE=standalone \
+nacos/nacos-server:2.2.1
+```
+启动nacos，会一直启动失败，但是第一次启动时启动成功，除此以外再也没有成功过  
+我尝试了加入启动时附带token以及各项参数（最开始成功了）
+```shell
+docker run -d --name nacos -e MODE=standalone -e NACOS_AUTH_ENABLE=true -e NACOS_AUTH_IDENTITY_KEY=serverIdentityKey1234567890abcdef -e NACOS_AUTH_IDENTITY_VALUE=serverIdentityValue9876543210fedcba -e NACOS_AUTH_TOKEN=VGhpc0lzTXlDdXN0b21TZWNyZXRLZXkwMTIzNDU2Nzg= -p 8848:8848 -p 9848:9848 nacos/nacos-server:v2.2.1
+```
+但最后都已失败告终  
+接着问了各种国外的ai大模型，给出的建议都和豆包大差不差，没有解决我的痛点  
+### 解决方案：
+此后花费了大量时间寻找解决方案，直到看见了这样一篇帖子：
+```http request
+https://blog.csdn.net/weixin_30598047/article/details/148537243?ops_request_misc=elastic_search_misc&request_id=616308ceb1efdc18410c850f47d04435&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~ElasticSearch~search_v2-1-148537243-null-null.142^v102^pc_search_result_base7&utm_term=%E4%BD%86%E5%86%85%E7%BD%AE%E6%95%B0%E6%8D%AE%E5%BA%93%20Derby%20%E5%90%AF%E5%8A%A8%E8%B6%85%E6%97%B6%20%2F%20%E6%8D%9F%E5%9D%8F%20%E2%86%92%20%E7%9B%B4%E6%8E%A5%E5%B4%A9%E6%BA%83%EF%BC%81&spm=1018.2226.3001.4187
+```
+在了解完Apache Derby后，终于发现
+```text
+在Nacos的单机模式（standalone）下，默认就采用了Derby作为其配置信息、服务元数据等内容的存储后端。
+
+嵌入式运行：Derby数据库引擎与你的Nacos应用运行在同一个Java虚拟机（JVM）进程中，无需单独安装和启动数据库服务。
+文件系统存储：所有数据库数据（表、索引、事务日志）都存储在derby-data这个文件夹的文件中。这意味着，该文件夹的完整性直接等同于数据库的完整性。
+事务与锁机制：为了保证ACID特性，Derby在运行时会持有文件锁（如db.lck）。如果Nacos进程被异常终止，这些锁可能无法正确释放，导致下次启动时认为数据库仍被占用。
+
+```
+也就是说我之前不优雅的删除nacos容器（应该不是这个原因，毕竟后面删除也不优雅）或者由于触发了oom或gc异常导致nacos异常停止损坏了Derby的data，而再次运行nacos容器是不会重构derby-data的    
+###### 我再仔细看了看ai对于日志的分析，其中有提到derby数据库启动失败/超时，但并未给出正确解决方案，只是不断修改参数并重复删除-启动容器
+##### 方案：进入docker/../derby-data文件夹，将他删掉再重启nacos即可
+
+## 问题8：yml配置的读取问题
+### 问题描述：
+在配置全局过滤器时，我想在nacos配置里面添加白名单
+直接使用@value注解发现读取到的列表为空  
+### 解决方案：
+新建一个配置类，通过"@ConfigurationProperties"注解获取配置
+```java
+@Component
+@ConfigurationProperties(prefix = "gateway.auth")
+@Data
+public class GatewayAuthProperties {
+
+    private List<String> whiteList = new ArrayList<>();
+}
+```
+最后再在过滤器里面注入即可
