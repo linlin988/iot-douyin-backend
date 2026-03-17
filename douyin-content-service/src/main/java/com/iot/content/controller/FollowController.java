@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/follow")
 @Tag(name = "关注模块",description = "关注接口")
+@Slf4j
 public class FollowController {
 
     @Autowired
