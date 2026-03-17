@@ -14,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/video")
-@Tag(name = "视频模块",description = "视频上传，查询，统计")
+@Tag(name = "视频模块",description = "视频上传，查询，详情")
 public class VideoController {
 
     @Autowired
@@ -56,3 +56,6 @@ public class VideoController {
         return Result.success(video);
     }
 }
+
+
+

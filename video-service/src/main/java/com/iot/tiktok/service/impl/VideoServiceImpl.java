@@ -9,8 +9,11 @@ import com.iot.tiktok.config.AliyunOSSOperator;
 import com.iot.tiktok.mapper.VideoMapper;
 import com.iot.tiktok.service.VideoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+
 
 
 @Service
@@ -22,13 +25,44 @@ public class VideoServiceImpl implements VideoService {
     @Autowired
     VideoMapper videoMapper;
 
+
+    @Autowired
+    StringRedisTemplate stringRedisTemplate;
+
+    //通过redis获取视频点赞数
+    public Long getVideoLikeCount(Long videoId) {
+        String redisKey = "like:" + videoId;
+        Long likeCount = stringRedisTemplate.opsForSet().size(redisKey);
+        return likeCount == null ? 0L : likeCount;
+    }
+
+    // 增加播放量
+    public void incrementPlayCount(Long videoId) {
+        String key = "video:play:count:" + videoId;
+        stringRedisTemplate.opsForValue().increment(key, 1);
+    }
+
+    // 获取播放量（优先读Redis，不存在则读数据库）
+    public Long getPlayCount(Long videoId) {
+        String key = "video:play:count:" + videoId;
+        String count = stringRedisTemplate.opsForValue().get(key);
+        if (count == null) {
+            Videos video = videoMapper.selectById(videoId);
+            return video == null ? 0L : video.getPlayCount();
+        }
+        return Long.parseLong(count);
+    }
+
+
     //视频上传
     @Override
     public Videos uploadVideo(MultipartFile file, MultipartFile coverfile, String title, String description, Long userId) throws Exception {
+
         String videoUrl = aliyunOSSOperator.upload(file.getBytes(), file.getOriginalFilename());
         String coverUrl = aliyunOSSOperator.upload(coverfile.getBytes(), coverfile.getOriginalFilename());
 
         Videos video = new Videos();
+
         video.setTitle(title);
         video.setDescription(description);
         video.setVideoUrl(videoUrl);
@@ -41,6 +75,10 @@ public class VideoServiceImpl implements VideoService {
         //result为受影响的行数，大于0表示插入成功
         int result = videoMapper.insert(video);
         if (result > 0) {
+            Long videoId = video.getId();
+            Long likeCount = getVideoLikeCount(videoId);
+            video.setLikeCount(likeCount);
+            video.setPlayCount(getPlayCount(videoId));
             return video;
         }
         return null;
@@ -56,22 +94,13 @@ public class VideoServiceImpl implements VideoService {
         return videoPage;
     }
 
+
     //视频详情与播放数统计
     @Override
     public Videos getVideoDetail(Long videoId) {
-        //先获取视频信息
-        Videos video = videoMapper.selectById(videoId);
-        if (video != null) {
-            //使用MyBatis-Plus的update方法，利用数据库的原子操作来增加播放数，确保并发安全
-            Videos updateVideo = new Videos();
-            updateVideo.setId(videoId);
-            updateVideo.setPlayCount(video.getPlayCount() + 1);
-            videoMapper.updateById(updateVideo);
-            //重新查询获取最新数据
-            video = videoMapper.selectById(videoId);
-        }
-        return video;
+        // 1. 先更新播放数（原子操作）
+        videoMapper.incrementPlayCount(videoId);
+        // 2. 再查询视频详情
+        return videoMapper.selectById(videoId);
     }
-
-
 }
