@@ -2,6 +2,7 @@ package com.iot.tiktok.service.impl;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.iot.commonModules.entity.Videos;
 import com.iot.tiktok.config.AliyunOSSOperator;
@@ -11,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.util.List;
 
 @Service
 public class VideoServiceImpl implements VideoService {
@@ -25,31 +24,36 @@ public class VideoServiceImpl implements VideoService {
 
     //视频上传
     @Override
-    public Videos uploadVideo(MultipartFile file, String title, String description) throws Exception {
+    public Videos uploadVideo(MultipartFile file, MultipartFile coverfile, String title, String description, Long userId) throws Exception {
         String videoUrl = aliyunOSSOperator.upload(file.getBytes(), file.getOriginalFilename());
+        String coverUrl = aliyunOSSOperator.upload(coverfile.getBytes(), coverfile.getOriginalFilename());
 
         Videos video = new Videos();
         video.setTitle(title);
         video.setDescription(description);
         video.setVideoUrl(videoUrl);
+        video.setCoverUrl(coverUrl);
+        video.setUserId(userId);
         video.setLikeCount(0L);
         video.setPlayCount(0L);
         video.setCommentCount(0L);
 
         //result为受影响的行数，大于0表示插入成功
         int result = videoMapper.insert(video);
-        return video;
-
+        if (result > 0) {
+            return video;
+        }
+        return null;
     }
 
     //视频查询（分页）
     @Override
-    public List<Videos> getVideoList(int page, int size) {
+    public IPage<Videos> getVideoList(int page, int size) {
         Page<Videos> videoPage = new Page<>(page, size);
         QueryWrapper<Videos> queryWrapper = new QueryWrapper<>();
         queryWrapper.orderByDesc("create_time"); //按创建时间倒序
         videoMapper.selectPage(videoPage, queryWrapper);
-        return videoPage.getRecords();
+        return videoPage;
     }
 
     //视频详情与播放数统计

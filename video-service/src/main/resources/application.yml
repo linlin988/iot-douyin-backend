@@ -19,7 +19,7 @@ spring:
     username: remote
 
 
-#???OSS
+#OSS
 aliyun:
   oss:
     endpoint: https://oss-cn-beijing.aliyuncs.com
