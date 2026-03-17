@@ -49,17 +49,12 @@
       </dependency>
 
 
-      <dependency>
-          <groupId>org.junit.jupiter</groupId>
-          <artifactId>junit-jupiter-api</artifactId>
-      </dependency>
+
 
 
       <dependency>
-          <groupId>io.swagger.core.v3</groupId>
-          <artifactId>swagger-annotations</artifactId>
-          <version>2.2.8</version>
-          <scope>compile</scope>
+          <groupId>com.github.xiaoymin</groupId>
+          <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
       </dependency>
 
       <!-- SpringBoot 3.x MySQL 8.0+ 驱动 -->
@@ -69,10 +64,20 @@
           <scope>runtime</scope>
       </dependency>
 
+      <dependency>
+          <groupId>com.alibaba.cloud</groupId>
+          <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+      </dependency>
+
+      <dependency>
+          <groupId>com.alibaba.cloud</groupId>
+          <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+      </dependency>
+
   </dependencies>
     <properties>
-        <maven.compiler.source>25</maven.compiler.source>
-        <maven.compiler.target>25</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
