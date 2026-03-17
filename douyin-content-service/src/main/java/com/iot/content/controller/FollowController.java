@@ -16,12 +16,14 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/follow")
-@Slf4j
 @Tag(name = "关注模块",description = "关注接口")
 public class FollowController {
 
     @Autowired
     private IFollowService followService;
+
+    @GetMapping("/test")//为网关转发测试用，可删
+    public Result test(){return Result.success();}
     /**
      * 关注或者取关
      * @param followedUserId

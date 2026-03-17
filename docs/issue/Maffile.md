@@ -124,3 +124,96 @@ public class GatewayAuthProperties {
 }
 ```
 最后再在过滤器里面注入即可
+
+## 问题9：网关聚合各个子模块knife4j文档时遇见的问题合集
+### 其一：版本问题
+有的依赖用的是swagger2，和网关knife版本有冲突  
+### 解决方案：
+都采用openapi3的knife就好了
+### 其二：配置问题
+在写单体服务时用的knife基本上不用太在意配置  
+但是在使用网关聚合文档时发现配置还是值得深究的  
+#### 问题描述：
+最开始的配置大概如下（由于没有备份，只能描述大概）：
+```yml
+spring:
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: testForMaffile
+          uri: lb://testForMaffile
+          predicates:
+            - Path=/test/**
+
+knife4j:
+  gateway:
+    enabled: true
+    tags-sorter: order
+    operations-sorter: order
+    strategy: manual
+    routes:
+      - name: test模块
+        service-name: testMaffile
+        url: /v3/api-docs?group=default
+        context-path: /test
+        order: 1
+```
+这样配置后发现直接访问子项目的doc可以访问到，  
+但是使用网关访问便报错：knife4j访问异常，控制台显示500，应该是路由没对
+#### 解决过程：
+查阅资料发现，在
+```yml
+predicates:
+  - Path=/test/**
+```
+同级目录添加：
+```yml
+filters:
+  - StripPrefix=1
+```
+也就是转发时自动去掉第一个路径（这里是test），同时注意knife4j里的context-path也一定要带上，这个是自动补路由前缀的  
+目前利用网关访问子服务的knife文档已经成功了  
+#### 可惜不久又发现一个问题：  
+使用原接口访问子服务时会提示未登录（不管有没有token）  
+很明显网关转发服务出问题了。  
+可是上面改的应该是接口文档的路径才对啊？带着这个问题又去找了一些帖子，发现其中的端倪  
+```yml
+predicates: *
+```
+断言路由，该路由转发到对应子服务，
+```yml
+filters:
+  - StripPrefix=1
+```
+去掉首路由后只剩后面部分路由，子服务根据剩下的路由找到对应方法，而knife4j的文档路由配置中会用context-path补全对应的路由来找到doc文档  
+### 解决方案：
+直白说来，就是网关服务的地址是由：服务器地址+端口+服务断言+方法路由  
+之前api没有按照这种格式来写为什么也能正常使用？  
+因为之前的断言路径（"/test/**"）与模块路径（"/test/**"）相同，正好StripPrefix又没有设置（默认为0）  
+冥冥中的巧合（或许是设计师巧妙的设计）让一开始没有报错  
+现在将StripPrefix设置为1后，断言路径（/test/**）被切去，拿接口
+```text
+/test/user
+```
+来举例，SP为0时正常转发为/test/user，可以正常访问    
+为1时转发/user,返回404.需要使用/test/test/user才能访问  
+因此在设计网关路由时也需要一些巧思，如断言为user表示用户模块，用户类的统一路由则不再使用user，可以改为login  
+则此时的api为：服务器地址+端口+/user/login  
+网关会转发：服务器地址+端口+/login，这样便完美契合
+
+
+
+

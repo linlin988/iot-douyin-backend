@@ -49,11 +49,13 @@
       </dependency>
 
 
-      <dependency>
-          <groupId>org.junit.jupiter</groupId>
-          <artifactId>junit-jupiter-api</artifactId>
-      </dependency>
 
+
+
+      <dependency>
+          <groupId>com.github.xiaoymin</groupId>
+          <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+      </dependency>
 
       <!-- SpringBoot 3.x MySQL 8.0+ 驱动 -->
       <dependency>
@@ -62,11 +64,14 @@
           <scope>runtime</scope>
       </dependency>
 
-      <!-- Spring Boot 3.x + OpenAPI3 + Jakarta 唯一正确依赖 -->
       <dependency>
-          <groupId>com.github.xiaoymin</groupId>
-          <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
-          <version>4.5.0</version>
+          <groupId>com.alibaba.cloud</groupId>
+          <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+      </dependency>
+
+      <dependency>
+          <groupId>com.alibaba.cloud</groupId>
+          <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
       </dependency>
 
   </dependencies>
