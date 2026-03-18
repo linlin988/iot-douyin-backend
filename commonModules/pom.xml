@@ -68,6 +68,14 @@
             <version>6.0.0</version>  <!-- Spring Boot 3 默认用 6.0.x，SB 3.2+ 可到 6.1.0 -->
             <scope>provided</scope>   <!-- 关键！编译时用，运行时由容器（如 Tomcat 10+）提供 -->
         </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-crypto</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
