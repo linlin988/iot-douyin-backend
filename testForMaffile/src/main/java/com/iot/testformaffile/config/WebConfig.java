@@ -11,14 +11,24 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new GatewayAuthInterceptor())
-                .addPathPatterns("/**")          // 拦截所有接口
-                .excludePathPatterns(           // 放行白名单
+                .addPathPatterns("/**")
+                .excludePathPatterns(
                         "/login",
                         "/captcha",
                         "/actuator/**",
                         "/error",
-                        "/test/exception",
-                        "/test/user/token"
+
+                        "/doc.html",
+                        "/webjars/**",
+                        "/swagger-ui.html",
+                        "/swagger-ui/**",
+                        "/swagger-resources/**",
+                        "/v3/api-docs",
+                        "/v3/api-docs/**",
+
+                        "/exception",
+                        "/maffile/user/token"
+
                 );
     }
 }
