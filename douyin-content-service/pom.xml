@@ -54,6 +54,18 @@
           <artifactId>junit-jupiter-api</artifactId>
       </dependency>
 
+      <!-- Spring Boot Redis 核心依赖（自动适配 StringRedisTemplate） -->
+      <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-data-redis</artifactId>
+      </dependency>
+
+      <!-- 连接池依赖（必须加，否则会报错/性能差） -->
+      <dependency>
+          <groupId>org.apache.commons</groupId>
+          <artifactId>commons-pool2</artifactId>
+      </dependency>
+
 
       <!-- SpringBoot 3.x MySQL 8.0+ 驱动 -->
       <dependency>
@@ -69,7 +81,38 @@
           <version>4.5.0</version>
       </dependency>
 
+          <!-- Nacos 服务注册 + 发现 -->
+          <dependency>
+              <groupId>com.alibaba.cloud</groupId>
+              <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+          </dependency>
+
+          <!-- Nacos 配置中心 -->
+          <dependency>
+              <groupId>com.alibaba.cloud</groupId>
+              <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+          </dependency>
+
+          <!-- Bootstrap 启动器（必须！否则读不到 nacos 配置）-->
+          <dependency>
+              <groupId>org.springframework.cloud</groupId>
+              <artifactId>spring-cloud-starter-bootstrap</artifactId>
+          </dependency>
+
+          <!-- 热部署（可选） -->
+          <dependency>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-devtools</artifactId>
+              <scope>runtime</scope>
+              <optional>true</optional>
+          </dependency>
+      <!-- OpenFeign 核心（自动集成负载均衡） -->
+      <dependency>
+          <groupId>org.springframework.cloud</groupId>
+          <artifactId>spring-cloud-starter-openfeign</artifactId>
+      </dependency>
   </dependencies>
+
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>

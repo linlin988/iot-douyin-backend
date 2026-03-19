@@ -67,9 +67,9 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper,Follows> impleme
                     .eq("followed_user_id", followedUserId).count());
             // 3.判断
             if (count > 0){
-                return Result.success();
+                return Result.success("true");
             }else {
-                return Result.error();
+                return Result.success("false");
             }
         }
 
