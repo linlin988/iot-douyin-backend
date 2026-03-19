@@ -1,5 +1,6 @@
 package com.iot.content.controller;
 
+import cn.hutool.core.util.StrUtil;
 import com.iot.commonModules.DTO.pageQuery;
 import com.iot.commonModules.common.Result;
 
@@ -33,9 +34,10 @@ public class FollowController {
      */
     @Operation(summary = "关注或取关")
     @PutMapping("/{id}/{follow}")
-    public Result follow(@PathVariable ("id") Long followedUserId,@PathVariable ("follow")  Boolean follow){
+    public Result follow(@PathVariable ("id") Long followedUserId,@PathVariable ("follow")  String follow){
        log.info("被关注者ID：{}", followedUserId);
-        return followService.add(followedUserId,follow);
+       Boolean Follow =Boolean.parseBoolean( follow);
+        return followService.add(followedUserId,Follow);
     }
 
     /**
@@ -71,12 +73,20 @@ public class FollowController {
        return followService.getMyFansList(pageQuery);
    }
 
+   /**
+    * 获取关注数量
+    * @return
+    */
    @Operation(summary = "获取关注数量")
    @GetMapping("/followCount")
    public Result followCount(){
        return followService.getFollowCountByUserId();
    }
 
+   /**
+    * 获取粉丝数量
+    * @return
+    */
    @Operation(summary = "获取粉丝数量")
    @GetMapping("/fansCount")
    public Result fansCount(){

@@ -77,6 +77,12 @@ public class Videos implements Serializable {
     @TableField(fill = FieldFill.UPDATE, update = "now()")
     private LocalDateTime updateTime;
 
+    /**
+     * 是否点赞
+     */
+    @TableField(exist = false)
+    private Boolean isLike; // 是否点赞
+
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 }

@@ -10,6 +10,7 @@ import com.iot.commonModules.DTO.pageQuery;
 import com.iot.commonModules.common.Result;
 import com.iot.commonModules.entity.Comments;
 import com.iot.commonModules.entity.User;
+import com.iot.commonModules.utils.UserContext;
 import com.iot.content.DTO.CommentDTO;
 import com.iot.content.VO.CommentVO;
 import com.iot.content.mapper.UserMapper;
@@ -28,24 +29,36 @@ import java.util.stream.Collectors;
 public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comments> implements ICommentService {
 
    @Resource
-   private CommentMapper commentMapper;
-   @Resource
    private UserMapper userMapper;
    @Resource
    private VideoMapper videoMapper;
 
-   /**
-    * 删除评论
-    * @param videoId
-    * @return
-    */
+    /**
+     * 删除评论
+     * @param commentId
+     * @return
+     */
     @Override
-    public Result deleteComment(Long videoId) {
-        Long userId = 1L;
-        remove(new QueryWrapper<Comments>().eq("video_id", videoId)
-                .eq("user_id", userId));
-        //减去该视频评论数
-        videoMapper.reduceCommentCount(videoId);
+    public Result deleteComment(Long commentId) {
+        Long userId = UserContext.getUser();
+        
+        // 1. 根据 commentId 查询评论信息
+        Comments comment = getById(commentId);
+        if (comment == null) {
+            return Result.error(404, "评论不存在");
+        }
+        
+
+        // if (!userId.equals(comment.getUserId())) {
+        //     return Result.error(403, "无权删除他人的评论");
+        // }
+        
+        // 3. 减去该视频的评论数
+        videoMapper.reduceCommentCount(comment.getVideoId());
+        
+        // 4. 删除评论记录
+        removeById(commentId);
+        
         return Result.success();
     }
 
@@ -102,9 +115,10 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comments> imp
      */
     @Override
     public Result addComment(CommentDTO commentDTO) {
-        Long userId=1l;
 
-        if (StrUtil.isBlank(commentDTO.getContent())) {
+        Long userId = UserContext.getUser();
+
+        if (StrUtil.isNotBlank(commentDTO.getContent())) {
             Comments comments = BeanUtil.copyProperties(commentDTO, Comments.class);
             comments.setUserId(userId);
             Boolean result = save(comments);

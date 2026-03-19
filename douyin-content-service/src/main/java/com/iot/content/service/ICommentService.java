@@ -7,7 +7,7 @@ import com.iot.commonModules.entity.Comments;
 import com.iot.content.DTO.CommentDTO;
 
 public interface ICommentService extends IService<Comments> {
-    Result deleteComment(Long videoId);
+    Result deleteComment(Long commentId);
 
     Result listComment(Long videoId, pageQuery pageQuery);
 

@@ -7,6 +7,7 @@ import com.iot.commonModules.DTO.pageQuery;
 import com.iot.commonModules.entity.Comments;
 import com.iot.content.DTO.CommentDTO;
 import com.iot.content.service.ICommentService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,20 +24,36 @@ public class CommentController {
     @Resource
     private ICommentService commentService;
 
+    /**
+     * 发布评论
+     * @param commentDTO
+     * @return
+     */
     @PostMapping("/add")
-    @Schema(description = "发布评论")
+    @Operation(description = "发布评论")
     public Result addComment(@RequestBody CommentDTO commentDTO){
         return commentService.addComment(commentDTO);
     }
 
+    /**
+     * 删除我的评论
+     * @param commentId
+     * @return
+     */
     @DeleteMapping("/delete/{id}")
-    @Schema(description = "删除我的评论")
-    public Result deleteComment(@PathVariable ("id") Long videoId){
-        return commentService.deleteComment(videoId);
+    @Operation(description = "删除我的评论")
+    public Result deleteComment(@PathVariable ("id") Long commentId){
+        return commentService.deleteComment(commentId);
     }
 
-    @GetMapping("/list/{id}")
-    @Schema(description = "获取当前评论列表")
+    /**
+     * 获取当前评论列表
+     * @param videoId
+     * @param pageQuery
+     * @return
+     */
+    @PostMapping("/list/{id}")
+   @Operation(description = "获取当前评论列表")
     public Result listComment(
             @PathVariable("id") Long videoId, @RequestBody pageQuery pageQuery){
         return commentService.listComment(videoId, pageQuery);
