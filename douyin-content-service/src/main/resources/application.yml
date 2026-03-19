@@ -1,14 +1,11 @@
-server:
-  port: 8081
 
 spring:
   application:
     name: content-service
   profiles:
     active: dev
-
   config:
-    import: optional:nacos:gateway-service-dev.yml
+    import: optional:nacos:content-service-dev.yml
   cloud:
     nacos:
       username: nacos
