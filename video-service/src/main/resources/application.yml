@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: video-service
+
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 121.41.228.22:8848
+        username: nacos
+        password: nacos
+      config:
+        server-addr: 121.41.228.22:8848
+        file-extension: yml
+        import-check:
+          enabled: false
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://121.41.228.22:3306/video?useSSL=false&serverTimezone=UTC
+    password: 123456
+    username: remote
+
+  servlet:
+    multipart:
+      max-file-size: 100MB    # 单个文件最大大小
+
+  data:
+    redis:
+      host: 121.41.228.22
+      port: 6379
+      password: 123456
+      database: 0
+      timeout: 60000ms
+
+#OSS
+aliyun:
+  oss:
+    endpoint: https://oss-cn-beijing.aliyuncs.com
+    bucketName: iot-douying
+    region: cn-beijing
