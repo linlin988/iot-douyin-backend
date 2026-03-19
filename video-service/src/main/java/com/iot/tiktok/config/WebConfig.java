@@ -20,7 +20,14 @@ public class WebConfig implements WebMvcConfigurer {
                         "/login",
                         "/captcha",
                         "/actuator/**",
-                        "/error"
+                        "/error",
+                        "/doc.html",
+                        "/webjars/**",
+                        "/swagger-ui.html",
+                        "/swagger-ui/**",
+                        "/swagger-resources/**",
+                        "/v3/api-docs",
+                        "/v3/api-docs/**"
                 );
     }
 }
