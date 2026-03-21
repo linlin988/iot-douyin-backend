@@ -1,12 +1,10 @@
 package com.iot.UserService.Service;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.iot.commonModules.utils.Jwt.JwtUtils;
 import com.iot.commonModules.utils.PasswordUtil.PasswordUtil;
 import com.iot.UserService.Dto.UserLoginDTO;
 import com.iot.UserService.Dto.UserRegisterDTO;
 import com.iot.UserService.Entity.User;
 import com.iot.UserService.Mapper.UserMapper;
-import com.iot.UserService.Service.UserService;
 import com.iot.UserService.Vo.UserInfoVO;
 import com.iot.UserService.Vo.UserLoginVO;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
-public class ServiceImpl extends com.baomidou.mybatisplus.extension.service.impl.ServiceImpl<UserMapper,User> implements UserService {
+public class UserServiceImpl extends com.baomidou.mybatisplus.extension.service.impl.ServiceImpl<UserMapper,User> implements UserService {
     private final PasswordUtil passwordUtil;
     private final JwtUtils jwtUtil;
     private final UserMapper userMapper;
@@ -33,13 +31,13 @@ public class ServiceImpl extends com.baomidou.mybatisplus.extension.service.impl
         //创建用户
         User user=new User();
         user.setUsername(registerDTO.getAccount());//设置用户名
-        user.getPassword(encryptedPwd);//设置加密密码
+        user.setPassword(encryptedPwd);//设置加密密码
         user.setCreate_time(LocalDateTime.now());//设置创建时间
         user.setUpdate_time(LocalDateTime.now());//设置更新时间
         user.setPhone(registerDTO.getAccount());//设置手机号
         user.setFan_count(0);
         user.setFollow_count(0);
-        UserMapper.insert(user);
+        userMapper.insert(user);
     }
     @Override
     public UserLoginVO login(UserLoginDTO loginDTO) {
@@ -53,7 +51,7 @@ public class ServiceImpl extends com.baomidou.mybatisplus.extension.service.impl
             throw new RuntimeException("密码错误");
         }
         // 3. 生成JWT Token
-        String token = jwtUtil.getToken();
+        String token = jwtUtil.getToken(user.getId());
         // 4. 构建返回VO
         UserLoginVO loginVO = new UserLoginVO();
         BeanUtils.copyProperties(user, loginVO);
@@ -77,4 +75,4 @@ public class ServiceImpl extends com.baomidou.mybatisplus.extension.service.impl
     }
 }
 
-}
+
