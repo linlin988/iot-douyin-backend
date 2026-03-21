@@ -41,7 +41,7 @@ public class JwtUtils {
 
     private static final int TOKEN_TIME_OUT = 1000 * 60 * 60;//这里可以设置过期时间，可以根据实际需要来调整
 
-    public static String getToken(String userId) {
+    public static String getToken(long userId) {
 
         //获取jwt生成器
         JWTCreator.Builder jwtBuilder = JWT.create();
