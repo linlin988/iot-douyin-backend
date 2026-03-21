@@ -16,6 +16,7 @@
         <module>douyin-content-service</module>
         <module>testForMaffile</module>
         <module>video-service</module>
+        <module>user-service</module>
     </modules>
 
     <url/>

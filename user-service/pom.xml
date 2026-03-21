@@ -12,7 +12,7 @@
     </parent>
 
     <artifactId>user-service</artifactId>
-    <name>service-user</name>
+    <name>user-service</name>
     <description>service-user</description>
 
     <properties>

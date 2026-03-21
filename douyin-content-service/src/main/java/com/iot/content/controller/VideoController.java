@@ -1,9 +1,9 @@
-package com.iot.tiktok.controller;
+package com.iot.content.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.iot.commonModules.common.Result;
 import com.iot.commonModules.entity.Videos;
-import com.iot.tiktok.service.VideoService;
+import com.iot.content.service.VideoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
