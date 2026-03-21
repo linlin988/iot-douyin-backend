@@ -3,9 +3,11 @@ package com.iot.testformaffile.controller;
 
 
 import com.github.xiaoymin.knife4j.spring.annotations.EnableKnife4j;
+import com.iot.commonModules.common.Result;
 import com.iot.commonModules.request.LoginRequest;
 import com.iot.commonModules.service.CaptchaService;
 import com.iot.commonModules.utils.Jwt.JwtUtils;
+import com.iot.commonModules.utils.UserContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,10 +56,10 @@ public class UserTestController {
         return "当前用户: " + username + " (ID: " + userId + ")";
     }
 
-    @Operation(summary = "获取token")
-    @GetMapping("/user/token")
-    public String getToken() {
-        String userId = "1243";
+    @Operation(summary = "获取token1")
+    @GetMapping("/user/token/1")
+    public String getToken1() {
+        String userId = "11113";
         String username = "testuser";
 
         String token = JwtUtils.getToken(userId);
@@ -71,5 +73,33 @@ public class UserTestController {
         redisTemplate.expire(redisKey, 600, TimeUnit.SECONDS);
 
         return token;
+    }
+
+    @Operation(summary = "获取token2")
+    @GetMapping("/user/token/2")
+    public String getToken2() {
+        String userId = "66663";
+        String username = "Newtestuser";
+
+        String token = JwtUtils.getToken(userId);
+
+        String redisKey = "login:" + token;
+
+        // 用 hash 存多个字段
+        redisTemplate.opsForHash().put(redisKey, "userId", userId);
+        redisTemplate.opsForHash().put(redisKey, "username", username);
+
+        redisTemplate.expire(redisKey, 600, TimeUnit.SECONDS);
+
+        return token;
+    }
+
+    @Operation(summary = "写入登录信息")
+    @GetMapping("/user/login")
+    public Object login(@RequestHeader(value = "iot-User-Id", required = false) String userId){
+        UserContext.setUser(Long.parseLong(userId));
+        Long testID = UserContext.getUser();
+        System.out.println("当前线程UserContext中的id：" + testID);
+        return Result.success(testID);
     }
 }

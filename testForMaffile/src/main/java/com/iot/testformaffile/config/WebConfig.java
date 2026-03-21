@@ -27,7 +27,7 @@ public class WebConfig implements WebMvcConfigurer {
                         "/v3/api-docs/**",
 
                         "/exception",
-                        "/maffile/user/token"
+                        "/maffile/user/token/**"
 
                 );
     }

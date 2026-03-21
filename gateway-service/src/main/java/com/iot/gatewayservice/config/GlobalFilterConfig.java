@@ -3,6 +3,7 @@ package com.iot.gatewayservice.config;
 
 import cn.hutool.core.text.AntPathMatcher;
 import com.alibaba.fastjson.JSON;
+import com.iot.commonModules.utils.UserContext;
 import org.springframework.util.StringUtils;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,6 +20,8 @@ import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+
+import static cn.hutool.core.lang.Console.log;
 
 
 @Component
@@ -49,7 +52,6 @@ public class GlobalFilterConfig implements GlobalFilter, Ordered {
         // 3. 获取 token
         String token = request.getHeaders().getFirst("token");
         if (StringUtils.isEmpty(token)) {
-            // 没 token → 直接返回 401
             return responseFail(exchange, "请先登录");
         }
 
@@ -65,6 +67,8 @@ public class GlobalFilterConfig implements GlobalFilter, Ordered {
         // 5.从 Redis 获取用户信息
         String userId = (String) redisTemplate.opsForHash().get(redisKey, "userId");
         String username = (String) redisTemplate.opsForHash().get(redisKey, "username");
+
+
 ;
 
         if (userId == null) {
