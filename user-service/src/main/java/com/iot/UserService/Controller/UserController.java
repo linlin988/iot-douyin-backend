@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
@@ -37,7 +37,7 @@ public class UserController {
     // 查询当前登录用户信息（从请求域获取userId）
     @GetMapping("/info")
     public Result getCurrentUserInfo(HttpServletRequest request) {
-        Long userId = (Long) request.getAttribute("userId");
+        Long userId = Long.valueOf(request.getHeader("iot-User-Id"));
         // 空值校验：userId不存在则抛自定义异常，由全局异常处理器返回标准化错误
         if (userId == null) {
             throw new AllException("未获取到登录用户信息", 401);

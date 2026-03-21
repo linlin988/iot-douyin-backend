@@ -1,4 +1,4 @@
-package com.iot.tiktok.service;
+package com.iot.content.service;
 
 
 import com.baomidou.mybatisplus.core.metadata.IPage;

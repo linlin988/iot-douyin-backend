@@ -1,4 +1,4 @@
-package com.iot.tiktok.config;
+package com.iot.content.config;
 
 import com.aliyun.oss.*;
 import com.aliyun.oss.common.auth.DefaultCredentialProvider;
