@@ -80,20 +80,23 @@ public class LikeServiceImpl extends ServiceImpl<LikeMapper, Likes> implements I
         ArrayList<String> videoIdSet = (ArrayList<String>) stringRedisTemplate.opsForSet().pop(DIRTY_KEY, 50);
 
         if (CollUtil.isEmpty(videoIdSet)) {
+            log.info("脏数据为空");
             return;
         }
-
+        log.info("脏数据-非-空");
         List<Videos> updateList = new ArrayList<>();
 
         for (String videoIdStr : videoIdSet) {
             Long videoId = Long.valueOf(videoIdStr);
             String countKey = LIKE_COUNT_KEY + videoId;
 
-            // 从Redis取最新计数
+            //
+            log.info("从Redis取最新计数");
             String countStr = stringRedisTemplate.opsForValue().get(countKey);
             if (countStr == null) {
                 continue;
             }
+            log.info("正在更新视频 ID：{}，点赞数：{}", videoId, countStr);
 
             Videos video = new Videos();
             video.setId(videoId);

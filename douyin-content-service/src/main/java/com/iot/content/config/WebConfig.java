@@ -1,6 +1,6 @@
-package com.iot.testformaffile.config;
+package com.iot.content.config;
 
-import com.iot.testformaffile.interceptor.GatewayAuthInterceptor;
+import com.iot.content.interceptor.GatewayAuthInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -24,10 +24,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "/swagger-ui/**",
                         "/swagger-resources/**",
                         "/v3/api-docs",
-                        "/v3/api-docs/**",
+                        "/v3/api-docs/**"
 
-                        "/exception",
-                        "/maffile/user/token/**"
 
                 );
     }
