@@ -9,14 +9,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class OpenApiConfig {
 
-    @Bean
-    public GroupedOpenApi testApi() {
-        return GroupedOpenApi.builder()
-                .group("follow-service")
-                .packagesToScan("com.iot.controller")
-                .pathsToMatch("/follow/**")
-                .build();
-    }
+
 
     @Bean
     public OpenAPI customOpenAPI() {

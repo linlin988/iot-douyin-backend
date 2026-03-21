@@ -30,6 +30,13 @@ public class VideoController {
         @RequestParam("description") String description,
         @RequestHeader("userId") Long userId) throws Exception {
 
+        //空文件判断
+        if (file.isEmpty()) {
+            return Result.error(500, "视频文件不能为空");
+        }
+        if (coverfile.isEmpty()) {
+            return Result.error(500, "封面文件不能为空");
+        }
         Videos video = videoService.uploadVideo(file, coverfile, title, description,  userId);
         if(video != null)
             return Result.success(video);

@@ -11,7 +11,7 @@ public class UserInfoInterceptors implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         // 1. 获取登录用户信息
-        String userId = request.getHeader("userId");
+        String userId = request.getHeader("iot-User-Id");
 
         // 2. 判断：**不为空**才存入ThreadLocal
         if (StrUtil.isNotBlank(userId)) {

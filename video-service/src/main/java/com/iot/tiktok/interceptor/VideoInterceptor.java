@@ -9,7 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public class VideoInterceptor implements HandlerInterceptor {
 
     // 网关必须传递的固定请求头（和网关里设置的一致）
-    private static final String GATEWAY_HEADER = "X-Gateway-Request";
+    private static final String GATEWAY_HEADER = "iot-gateway-request";
     private static final String GATEWAY_SECRET = "internal-gateway-123456";
 
     @Override
