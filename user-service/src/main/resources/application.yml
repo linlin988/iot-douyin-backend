@@ -1,16 +1,43 @@
+server:
+  port: 8081
 spring:
-  application:
-    name: user-service
-  profiles:
-    active: dev
-  config:
-    import: nacos:user-service-dev.yml
-  cloud:
-    nacos:
-      username: nacos
-      password: nacos
-      discovery:
-        server-addr: 121.41.228.22:8848
-      config:
-        server-addr: 121.41.228.22:8848
-        file-extension: yml
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/iot_douyin?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: tang20070102
+    hikari:
+      maximum-pool-size: 10
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.iot.UserService.Enyity
+jwt:
+  secret: your-secret-key-iot-douyin-2025
+  expire: 86400000
+  header: token
+
+web:
+  cors:
+    allowed-origins: "*"
+    allowed-methods: "*"
+    allowed-headers: "*"
+
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+    enable-swagger-models: false
+
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+  packages-to-scan: com.iot.UserService.Controller

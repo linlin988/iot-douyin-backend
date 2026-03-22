@@ -16,9 +16,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.concurrent.TimeUnit;
-
+import com.iot.UserService.Vo.UserLoginVO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+@Tag(name = "用户管理接口", description = "包含用户注册、登录、查询用户信息等接口") // 控制器注解
 @RestController
 @RequestMapping
 @RequiredArgsConstructor
@@ -65,6 +67,7 @@ public class UserController {
     }
 
     // 用户注册
+    @Operation(summary = "用户注册", description = "传入用户名/密码/手机号，完成用户注册，已存在则报错") // 接口注解
     @PostMapping("/register")
     public Result register(@Valid @RequestBody UserRegisterDTO registerDTO) {
         userService.register(registerDTO);
@@ -73,6 +76,7 @@ public class UserController {
     }
 
     // 用户登录
+    @Operation(summary = "用户登录", description = "传入账号/密码，登录成功返回token和用户基础信息")
     @PostMapping("/login")
     public Result login(@Valid @RequestBody UserLoginDTO loginDTO) {
         UserLoginVO loginVO = userService.login(loginDTO);
@@ -81,6 +85,7 @@ public class UserController {
     }
 
     // 查询当前登录用户信息（从请求域获取userId）
+    @Operation(summary = "查询当前登录用户信息", description = "从请求头token解析userId，返回用户详细信息")
     @GetMapping("/info")
     public Result getCurrentUserInfo(HttpServletRequest request) {
         Long userId = Long.valueOf(request.getHeader("iot-User-Id"));
@@ -94,6 +99,7 @@ public class UserController {
     }
 
     // 根据用户ID查询用户信息（供其他服务调用，如comment服务）
+    @Operation(summary = "按ID查询用户信息", description = "传入用户ID，返回用户昵称、头像等基础信息，供评论/视频微服务调用")
     @GetMapping("/info/{userId}")
     public Result getUserInfoById(@PathVariable Long userId) {
         // 空值校验：路径参数userId为空则抛自定义异常
