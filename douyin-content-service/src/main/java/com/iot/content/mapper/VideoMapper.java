@@ -5,6 +5,7 @@ import com.iot.commonModules.entity.Videos;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -17,4 +18,8 @@ public interface VideoMapper extends BaseMapper<Videos> {
     void addCommentCount(Long videoId);
 
     void batchUpdateLikeCount(@Param("list") List<Videos> List);
+
+    @Update("UPDATE t_video SET play_count = play_count + 1 WHERE id = #{videoId}")
+    void incrementPlayCount(Long videoId);
+
 }

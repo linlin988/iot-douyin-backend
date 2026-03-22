@@ -9,8 +9,8 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @MapperScan("com.iot.UserService.Mapper") // 扫描Mapper接口
 @EnableDiscoveryClient//开启nacos服务发现
 @EnableFeignClients//微服务之间的调用，开启openfeign
-public class ServiceUserApplication {
+public class userServiceApplication {
     public static void main(String[] args) {
-        SpringApplication.run(ServiceUserApplication.class, args);
+        SpringApplication.run(userServiceApplication.class, args);
     }
 }

@@ -1,13 +1,13 @@
-package com.iot.tiktok.service.impl;
+package com.iot.content.service.impl;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.iot.commonModules.entity.Videos;
-import com.iot.tiktok.config.AliyunOSSOperator;
-import com.iot.tiktok.mapper.VideoMapper;
-import com.iot.tiktok.service.VideoService;
+import com.iot.content.config.AliyunOSSOperator;
+import com.iot.content.mapper.VideoMapper;
+import com.iot.content.service.VideoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;

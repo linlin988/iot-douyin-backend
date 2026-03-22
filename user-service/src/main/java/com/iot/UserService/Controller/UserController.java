@@ -17,7 +17,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "用户管理接口", description = "包含用户注册、登录、查询用户信息等接口") // 控制器注解
 @RestController
-@RequestMapping("/user")
+@RequestMapping
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
@@ -44,7 +44,7 @@ public class UserController {
     @Operation(summary = "查询当前登录用户信息", description = "从请求头token解析userId，返回用户详细信息")
     @GetMapping("/info")
     public Result getCurrentUserInfo(HttpServletRequest request) {
-        Long userId = (Long) request.getAttribute("userId");
+        Long userId = Long.valueOf(request.getHeader("iot-User-Id"));
         // 空值校验：userId不存在则抛自定义异常，由全局异常处理器返回标准化错误
         if (userId == null) {
             throw new AllException("未获取到登录用户信息", 401);
