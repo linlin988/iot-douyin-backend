@@ -13,7 +13,7 @@
 
     <artifactId>user-service</artifactId>
     <name>user-service</name>
-    <description>service-user</description>
+    <description>user-service</description>
 
     <properties>
         <java.version>17</java.version>
@@ -92,7 +92,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <!-- 可选：绑定SpringBoot版本，继承父POM时可省略 -->
             </plugin>
         </plugins>
     </build>
