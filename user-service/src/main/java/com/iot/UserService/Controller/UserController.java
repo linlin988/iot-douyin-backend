@@ -7,9 +7,14 @@ import com.iot.UserService.Dto.UserRegisterDTO;
 import com.iot.UserService.Service.UserService;
 import com.iot.UserService.Vo.UserInfoVO;
 import com.iot.UserService.Vo.UserLoginVO;
+import com.iot.commonModules.utils.Jwt.JwtUtils;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 import com.iot.UserService.Vo.UserLoginVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,6 +26,45 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
+
+    @GetMapping("/token/1")
+    public String getToken1() {
+        String userId = "11113";
+        String username = "testuser";
+
+        String token = JwtUtils.getToken(Long.parseLong(userId));
+
+        String redisKey = "login:" + token;
+
+        // 用 hash 存多个字段
+        redisTemplate.opsForHash().put(redisKey, "userId", userId);
+        redisTemplate.opsForHash().put(redisKey, "username", username);
+
+        redisTemplate.expire(redisKey, 6000, TimeUnit.SECONDS);
+
+        return token;
+    }
+
+    @GetMapping("/token/2")
+    public String getToken2() {
+        String userId = "66663";
+        String username = "Newtestuser";
+
+        String token = JwtUtils.getToken(Long.parseLong(userId));
+
+        String redisKey = "login:" + token;
+
+        // 用 hash 存多个字段
+        redisTemplate.opsForHash().put(redisKey, "userId", userId);
+        redisTemplate.opsForHash().put(redisKey, "username", username);
+
+        redisTemplate.expire(redisKey, 600, TimeUnit.SECONDS);
+
+        return token;
+    }
 
     // 用户注册
     @Operation(summary = "用户注册", description = "传入用户名/密码/手机号，完成用户注册，已存在则报错") // 接口注解
