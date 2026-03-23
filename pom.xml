@@ -13,8 +13,7 @@
     <modules>
         <module>commonModules</module>
         <module>gateway-service</module>
-        <module>douyin-content-service</module>
-        <module>testForMaffile</module>
+        <module>content-service</module>
         <module>user-service</module>
     </modules>
 
@@ -49,7 +48,7 @@
             <dependency>
                 <groupId>com.alibaba.cloud</groupId>
                 <artifactId>spring-cloud-alibaba-dependencies</artifactId>
-                <version>2022.0.0.0-RC2</version>
+                <version>2022.0.0.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -130,6 +129,26 @@
                 <version>4.5.0</version>
             </dependency>
 
+            <!-- Elasticsearch -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+                <version>3.0.13</version>
+            </dependency>
+
+            <!-- Elasticsearch High Level REST Client -->
+            <dependency>
+                <groupId>co.elastic.clients</groupId>
+                <artifactId>elasticsearch-rest-high-level-client</artifactId>
+                <version>8.5.3</version>
+            </dependency>
+
+            <!-- Elasticsearch Java API Client -->
+            <dependency>
+                <groupId>co.elastic.clients</groupId>
+                <artifactId>elasticsearch-java</artifactId>
+                <version>8.5.3</version>
+            </dependency>
 
         </dependencies>
 
@@ -139,12 +158,27 @@
 
 
     <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>3.0.13</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>repackage</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <layers>
+                            <enabled>true</enabled>
+                        </layers>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
 
 </project>

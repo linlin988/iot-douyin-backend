@@ -1,10 +1,9 @@
 package com.iot.UserService.Service;
-
+import com.iot.commonModules.DTO.PageDTO;
 import com.iot.commonModules.utils.Jwt.JwtUtils;
 import com.iot.commonModules.utils.PasswordUtil.PasswordUtil;
 import com.iot.UserService.Dto.UserLoginDTO;
 import com.iot.UserService.Dto.UserRegisterDTO;
-import com.iot.UserService.Dto.UserUpdateDTO; // 新增导入：修改用户信息的DTO
 import com.iot.UserService.Entity.User;
 import com.iot.UserService.Mapper.UserMapper;
 import com.iot.UserService.Vo.UserInfoVO;
@@ -13,26 +12,29 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils; // 新增导入：空值判断
 
+import javax.management.Query;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl extends com.baomidou.mybatisplus.extension.service.impl.ServiceImpl<UserMapper, User> implements UserService {
+public class UserServiceImpl extends com.baomidou.mybatisplus.extension.service.impl.ServiceImpl<UserMapper,User> implements UserService {
     private final PasswordUtil passwordUtil;
     private final JwtUtils jwtUtil;
     private final UserMapper userMapper;
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void register(UserRegisterDTO registerDTO) {
-        User existUser = UserMapper.selectByAccount(registerDTO.getAccount());
-        if (existUser != null) {
+    //注册时检验用户是否存在
+    public void register(UserRegisterDTO registerDTO){
+        User existUser=UserMapper.selectByAccount(registerDTO.getAccount());
+        if(existUser!=null){
             throw new RuntimeException("用户名/手机号已经存在");
         }
-        String encryptedPwd = passwordUtil.encrypt(registerDTO.getPassword());//密码加密
+        String encryptedPwd=passwordUtil.encrypt(registerDTO.getPassword());//密码加密
         //创建用户
-        User user = new User();
+        User user=new User();
         user.setUsername(registerDTO.getAccount());//设置用户名
         user.setPassword(encryptedPwd);//设置加密密码
         user.setCreate_time(LocalDateTime.now());//设置创建时间
@@ -61,7 +63,6 @@ public class UserServiceImpl extends com.baomidou.mybatisplus.extension.service.
         loginVO.setToken(token);
         return loginVO;
     }
-
     @Override
     public UserInfoVO getUserInfoById(Long userId) {
         User user = userMapper.selectById(userId);
@@ -78,35 +79,18 @@ public class UserServiceImpl extends com.baomidou.mybatisplus.extension.service.
         return UserMapper.selectByAccount(account);
     }
 
-    //修改用户信息
     @Override
-    @Transactional(rollbackFor = Exception.class) // 事务保证原子性
-    public void updateUserInfo(Long userId, UserUpdateDTO updateDTO) {
-        // 1. 基础校验：用户是否存在
-        User user = userMapper.selectById(userId);
-        if (user == null) {
-            throw new RuntimeException("用户不存在");
-        }
-
-        // 2. 更新头像+昵称（
-        // 空值处理：不传则保留原有值，避免更新为null
-        String finalAvatar = StringUtils.hasText(updateDTO.getAvatar()) ? updateDTO.getAvatar() : user.getAvatar();
-        String finalNickname = StringUtils.hasText(updateDTO.getNickname()) ? updateDTO.getNickname() : user.getUsername(); // 你实体类用的是username，数据库是nickname？需确认字段映射
-        if (!finalAvatar.equals(user.getAvatar()) || !finalNickname.equals(user.getUsername())) {
-            userMapper.updateUserInfo(userId, finalAvatar, finalNickname);
-            // 同步更新update_time（你原有代码有update_time字段）
-            user.setUpdate_time(LocalDateTime.now());
-            userMapper.updateById(user); // 仅更新时间，不影响其他字段
-        }
-
-        // 3. 更新关注数
-        if (updateDTO.getFollowCountDelta() != null) {
-            userMapper.updateFollowCount(updateDTO.getFollowCountDelta(), userId);
-        }
-
-        // 4. 更新粉丝数
-        if (updateDTO.getFanCountDelta() != null) {
-            userMapper.updateFanCount(userId, updateDTO.getFanCountDelta());
-        }
+    public List<UserInfoVO> getUserInfoByIds(List<Long> ids) {
+        List<User> users = userMapper.selectBatchIds(ids);
+        return users.stream()
+                .map(user -> {
+                    UserInfoVO infoVO = new UserInfoVO();
+                    BeanUtils.copyProperties(user, infoVO);
+                    return infoVO;
+                })
+                .collect(Collectors.toList());
     }
+
 }
+
+

@@ -3,7 +3,9 @@ package com.iot.gatewayservice.config;
 
 import cn.hutool.core.text.AntPathMatcher;
 import com.alibaba.fastjson.JSON;
-import com.iot.commonModules.utils.UserContext;
+import org.springframework.boot.web.reactive.error.DefaultErrorAttributes;
+import org.springframework.boot.web.reactive.error.ErrorAttributes;
+import org.springframework.context.annotation.Bean;
 import org.springframework.util.StringUtils;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,11 +23,11 @@ import reactor.core.publisher.Mono;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import static cn.hutool.core.lang.Console.log;
 
 
 @Component
 public class GlobalFilterConfig implements GlobalFilter, Ordered {
+
 
     @Autowired
     private GatewayAuthProperties authProperties;
@@ -89,9 +91,24 @@ public class GlobalFilterConfig implements GlobalFilter, Ordered {
 
     private boolean isWhiteListed(String path) {
         if (authProperties.getWhiteList() == null || authProperties.getWhiteList().isEmpty()) {
+            System.out.println("白名单为空，返回false");
             return false;
         }
-        return authProperties.getWhiteList().stream().anyMatch(pattern -> pathMatcher.match(pattern.trim(), path));
+        
+        boolean matched = authProperties.getWhiteList().stream()
+                .anyMatch(pattern -> {
+                    boolean result = pathMatcher.match(pattern.trim(), path);
+                    if (result) {
+                        System.out.println("路径匹配成功: " + path + " 匹配模式: " + pattern.trim());
+                    }
+                    return result;
+                });
+        
+        if (!matched) {
+            System.out.println("路径未匹配白名单: " + path);
+        }
+        
+        return matched;
     }
 
     // 返回错误信息

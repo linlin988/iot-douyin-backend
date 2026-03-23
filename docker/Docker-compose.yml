@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+
+  gateway:
+    image: iot/gateway-service:0.0.1
+    container_name: gateway
+    ports:
+      - "9999:9999"
+    environment:
+      - JAVA_OPTS=-XX:+UseContainerSupport -XX:MaxRAMPercentage=70 -XX:+UseSerialGC
+    deploy:
+      resources:
+        limits:
+          memory: 300m
+    restart: always
+
+  user:
+    image: iot/user-service:0.0.1
+    container_name: user-service
+    ports:
+      - "8081:8081"
+    environment:
+      - JAVA_OPTS=-XX:+UseContainerSupport -XX:MaxRAMPercentage=60 -XX:+UseSerialGC
+    deploy:
+      resources:
+        limits:
+          memory: 250m
+    restart: always
+
+  content:
+    image: iot/content-service:0.0.1
+    container_name: content-service
+    ports:
+      - "8082:8082"
+    environment:
+      - JAVA_OPTS=-XX:+UseContainerSupport -XX:MaxRAMPercentage=65 -XX:+UseSerialGC
+    deploy:
+      resources:
+        limits:
+          memory: 300m
+    restart: always
+
+networks:
+  default:
+    name: iot-network

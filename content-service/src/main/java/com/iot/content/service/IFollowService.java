@@ -1,0 +1,23 @@
+package com.iot.content.service;
+
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.iot.commonModules.DTO.pageQuery;
+import com.iot.commonModules.common.Result;
+import com.iot.commonModules.entity.Follows;
+
+public interface IFollowService extends IService<Follows> {
+
+    Result add(Long followedUserId, Boolean follow);
+
+    Result queryFollow(Long followedUserId);
+
+    Result getMyFollowList(pageQuery pageQuery);
+
+    Result getMyFansList(pageQuery pageQuery);
+
+    Result getFollowCountByUserId();
+
+    Result getFansCountByUserId();
+
+    Result getCommonFollowList(Long itsId);
+}
