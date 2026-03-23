@@ -84,6 +84,36 @@ public class VideoServiceImpl implements VideoService {
         return null;
     }
 
+    //删除视频
+    @Override
+    public boolean deleteVideo(Long videoId, Long userId) throws Exception {
+        // 1. 查询视频信息
+        Videos video = videoMapper.selectById(videoId);
+        if (video == null) {
+            return false;
+        }
+
+        // 2. 权限验证：检查视频是否属于当前用户
+        if (!video.getUserId().equals(userId)) {
+            return false;
+        }
+
+        // 3. 从OSS中删除视频文件和封面文件
+        aliyunOSSOperator.delete(video.getVideoUrl());
+        aliyunOSSOperator.delete(video.getCoverUrl());
+
+        // 4. 从数据库中删除视频记录
+        videoMapper.deleteById(videoId);
+
+        // 5. 清除相关的Redis缓存
+        String likeKey = "like:" + videoId;
+        String playCountKey = "video:play:count:" + videoId;
+        stringRedisTemplate.delete(likeKey);
+        stringRedisTemplate.delete(playCountKey);
+
+        return true;
+    }
+
     //视频查询（分页）
     @Override
     public IPage<Videos> getVideoList(int page, int size) {

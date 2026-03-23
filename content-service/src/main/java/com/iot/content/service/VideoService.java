@@ -10,6 +10,9 @@ public interface VideoService {
     //视频上传
     Videos uploadVideo(MultipartFile file, MultipartFile coverfile, String title, String description, Long userId) throws Exception;
 
+    //删除视频
+    boolean deleteVideo(Long videoId, Long userId) throws Exception;
+
     //视频查询（分页）
     IPage<Videos> getVideoList(int page, int size);
 

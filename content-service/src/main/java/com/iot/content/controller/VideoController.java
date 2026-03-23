@@ -43,9 +43,17 @@ public class VideoController {
         return Result.error(500,"视频上传失败");
     }
 
+    //视频删除
+    @DeleteMapping("/delete/{videoId}")
+    public Result deleteVideo(@PathVariable Long videoId, @RequestHeader("userId") Long userId) throws Exception {
+        boolean isSuccess =videoService.deleteVideo(videoId, userId);
+        if(isSuccess)
+            return Result.success();
+        else return Result.error(500,"视频删除失败");
+    }
+
 
     //视频列表查询
-    @Operation(summary = "视频列表查询")
     @GetMapping("/list")
     public Result getVideoList(
             @RequestParam(defaultValue = "1") int page,

@@ -26,6 +26,7 @@ public class AliyunOSSOperator {
     @Value("${aliyun.oss.accessKeySecret}")
     private String accessKeySecret;
 
+    // 上传文件
     public String upload(byte[] content, String originalFilename) throws Exception {
         // 按日期生成目录
         String dir = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM"));
@@ -51,5 +52,26 @@ public class AliyunOSSOperator {
 
         // 返回正确的访问地址
         return "https://" + bucketName + "." + endpoint + "/" + objectName;
+    }
+
+
+    // 删除文件
+    public void delete(String fileUrl) throws Exception {
+        // 从URL中提取objectName
+        String prefix = "https://" + bucketName + "." + endpoint + "/";
+        String objectName = fileUrl.substring(prefix.length());
+        OSS ossClient = new OSSClientBuilder().build(
+                endpoint,
+                accessKeyId,
+                accessKeySecret
+        );
+        try {
+            // 删除文件
+            ossClient.deleteObject(bucketName, objectName);
+        } finally {
+            if (ossClient != null) {
+                ossClient.shutdown();
+            }
+        }
     }
 }
