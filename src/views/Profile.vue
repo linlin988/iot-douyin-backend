@@ -100,8 +100,8 @@ const activeTab = ref('works')
 const userId = route.params.userId
 
 // 处理关注
-const handleFollow = () => {
-  userStore.toggleFollow()
+const handleFollow = async () => {
+  await userStore.toggleFollow()
 }
 
 // 返回上一页

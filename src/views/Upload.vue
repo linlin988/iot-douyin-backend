@@ -84,6 +84,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { api } from '../api'
 
 const router = useRouter()
 
@@ -152,18 +153,38 @@ const handleUpload = async () => {
   isUploading.value = true
   uploadProgress.value = 0
   
-  // 模拟上传过程
-  const interval = setInterval(() => {
-    uploadProgress.value += 10
-    if (uploadProgress.value >= 100) {
-      clearInterval(interval)
+  try {
+    // 创建FormData对象
+    const formData = new FormData()
+    formData.append('video', videoFile.value)
+    formData.append('title', videoTitle.value)
+    formData.append('description', videoDescription.value)
+    
+    // 调用API上传视频
+    const response = await api.video.create(formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      },
+      onUploadProgress: (progressEvent) => {
+        uploadProgress.value = Math.round((progressEvent.loaded / progressEvent.total) * 100)
+      }
+    })
+    
+    if (response.data.code === 200) {
+      // 上传成功，跳转到主页
       setTimeout(() => {
         isUploading.value = false
-        // 上传完成，跳转到主页
         router.push('/')
       }, 500)
+    } else {
+      throw new Error('上传失败')
     }
-  }, 300)
+  } catch (error) {
+    console.error('Upload failed:', error)
+    isUploading.value = false
+    // 显示错误提示
+    alert('上传失败，请重试')
+  }
 }
 
 // 返回上一页

@@ -5,7 +5,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import VideoPlayer from '../components/VideoPlayer.vue'
 import { useVideoStore } from '../store'
 
@@ -30,6 +30,11 @@ const preloadNextVideo = (currentIndex) => {
     }
   }
 }
+
+// 监听视频列表变化
+watch(() => videoStore.videoList, (newList) => {
+  videoList.value = newList
+}, { deep: true })
 
 onMounted(async () => {
   // 获取视频列表

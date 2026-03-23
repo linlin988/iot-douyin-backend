@@ -34,23 +34,23 @@
           <div class="right-actions">
             <div class="action-item" @click.stop="handleLike(video.id)">
               <div class="action-icon" :class="{ 'liked': video.isLiked }">
-                <van-icon name="heart" size="32" />
+                <Icon name="heart" size="32" />
               </div>
               <span class="action-text">{{ formatNumber(video.likes) }}</span>
             </div>
             <div class="action-item" @click.stop="showComments(video.id)">
-              <van-icon name="chat-o" size="32" />
+              <Icon name="chat-o" size="32" />
               <span class="action-text">{{ formatNumber(video.comments) }}</span>
             </div>
             <div class="action-item" @click.stop="handleShare(video.id)">
-              <van-icon name="share-o" size="32" />
+              <Icon name="share-o" size="32" />
               <span class="action-text">{{ formatNumber(video.shares) }}</span>
             </div>
           </div>
           
           <!-- 点赞动画 -->
           <div v-if="showLikeAnimation && currentIndex === index" class="like-animation">
-            <van-icon name="heart" size="100" />
+            <Icon name="heart" size="100" />
           </div>
         </div>
       </div>
@@ -61,7 +61,7 @@
       <div class="comments-container">
         <div class="comments-header">
           <h3>评论</h3>
-          <van-icon name="cross" @click="showCommentsPopup = false" />
+          <Icon name="cross" @click="showCommentsPopup = false" />
         </div>
         <div class="comments-list">
           <div v-for="(comment, index) in comments" :key="index" class="comment-item">
@@ -73,7 +73,7 @@
               </div>
               <p class="comment-text">{{ comment.text }}</p>
               <div class="comment-footer">
-                <van-icon name="heart-o" @click="handleCommentLike(index)" />
+                <Icon name="heart-o" @click="handleCommentLike(index)" />
                 <span class="comment-likes">{{ comment.likes }}</span>
               </div>
             </div>
@@ -98,7 +98,8 @@ import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useVideoStore } from '../store'
 import { formatNumber } from '../utils/format'
-import { Icon as vanIcon } from 'vant'
+import { Icon } from 'vant'
+import { api } from '../api'
 
 const props = defineProps({
   videoList: {
@@ -121,6 +122,7 @@ const touchEndY = ref(0)
 const showLikeAnimation = ref(false)
 const showCommentsPopup = ref(false)
 const commentInput = ref('')
+const page = ref(1)
 
 // 模拟评论数据
 const comments = ref([
@@ -153,7 +155,7 @@ const handleTouchMove = (e) => {
 }
 
 // 处理触摸结束
-const handleTouchEnd = () => {
+const handleTouchEnd = async () => {
   const diff = touchStartY.value - touchEndY.value
   if (diff > 50 && currentIndex.value < props.videoList.length - 1) {
     // 向上滑动，下一个视频
@@ -161,6 +163,12 @@ const handleTouchEnd = () => {
     videoStore.setCurrentVideoIndex(currentIndex.value)
     emit('videoChange', currentIndex.value)
     playCurrentVideo()
+    
+    // 检查是否需要加载更多视频
+    if (currentIndex.value >= props.videoList.length - 2 && !videoStore.isLoading && videoStore.hasMore) {
+      page.value++
+      await videoStore.fetchVideoList(page.value, true)
+    }
   } else if (diff < -50 && currentIndex.value > 0) {
     // 向下滑动，上一个视频
     currentIndex.value--
@@ -185,10 +193,10 @@ const handleVideoClick = (index) => {
 }
 
 // 处理双击点赞
-const handleVideoDoubleClick = (index) => {
+const handleVideoDoubleClick = async (index) => {
   if (index === currentIndex.value) {
     const video = props.videoList[index]
-    videoStore.toggleLike(video.id)
+    await videoStore.toggleLike(video.id)
     showLikeAnimation.value = true
     setTimeout(() => {
       showLikeAnimation.value = false
@@ -197,13 +205,13 @@ const handleVideoDoubleClick = (index) => {
 }
 
 // 处理点赞
-const handleLike = (videoId) => {
-  videoStore.toggleLike(videoId)
+const handleLike = async (videoId) => {
+  await videoStore.toggleLike(videoId)
 }
 
 // 处理关注
-const handleFollow = (userId) => {
-  videoStore.toggleFollow(userId)
+const handleFollow = async (userId) => {
+  await videoStore.toggleFollow(userId)
 }
 
 // 处理分享
@@ -213,8 +221,42 @@ const handleShare = (videoId) => {
 }
 
 // 显示评论
-const showComments = (videoId) => {
+const showComments = async (videoId) => {
+  try {
+    const response = await api.comment.getList(videoId)
+    if (response.data.code === 200) {
+      comments.value = response.data.data.records.map(comment => ({
+        id: comment.id,
+        author: comment.username,
+        avatar: comment.avatar || `https://example.com/avatar${comment.userId}.jpg`,
+        text: comment.content,
+        time: formatCommentTime(comment.createTime),
+        likes: comment.likeCount
+      }))
+    }
+  } catch (error) {
+    console.error('Failed to fetch comments:', error)
+    // 保持默认评论数据
+  }
   showCommentsPopup.value = true
+}
+
+// 格式化评论时间
+const formatCommentTime = (timeString) => {
+  const now = new Date()
+  const commentTime = new Date(timeString)
+  const diff = now - commentTime
+  const minutes = Math.floor(diff / 60000)
+  const hours = Math.floor(diff / 3600000)
+  const days = Math.floor(diff / 86400000)
+  
+  if (minutes < 60) {
+    return `${minutes}分钟前`
+  } else if (hours < 24) {
+    return `${hours}小时前`
+  } else {
+    return `${days}天前`
+  }
 }
 
 // 处理评论点赞
@@ -223,17 +265,43 @@ const handleCommentLike = (index) => {
 }
 
 // 发送评论
-const sendComment = () => {
+const sendComment = async () => {
   if (commentInput.value.trim()) {
-    comments.value.unshift({
-      id: Date.now(),
-      author: videoStore.currentUser.name,
-      avatar: videoStore.currentUser.avatar,
-      text: commentInput.value,
-      time: 'Just now',
-      likes: 0
-    })
-    commentInput.value = ''
+    try {
+      const currentVideo = props.videoList[currentIndex.value]
+      if (currentVideo) {
+        const response = await api.comment.create({
+          videoId: currentVideo.id,
+          content: commentInput.value
+        })
+        
+        if (response.data.code === 200) {
+          comments.value.unshift({
+            id: response.data.data.id,
+            author: videoStore.currentUser.name,
+            avatar: videoStore.currentUser.avatar,
+            text: commentInput.value,
+            time: '刚刚',
+            likes: 0
+          })
+          // 更新视频评论数
+          currentVideo.comments++
+          commentInput.value = ''
+        }
+      }
+    } catch (error) {
+      console.error('Failed to send comment:', error)
+      // 降级使用本地添加
+      comments.value.unshift({
+        id: Date.now(),
+        author: videoStore.currentUser.name,
+        avatar: videoStore.currentUser.avatar,
+        text: commentInput.value,
+        time: '刚刚',
+        likes: 0
+      })
+      commentInput.value = ''
+    }
   }
 }
 
@@ -271,6 +339,19 @@ const handleCanPlay = (index) => {
 // 监听视频列表变化
 watch(() => props.videoList, () => {
   nextTick(() => {
+    // 重新初始化双击事件
+    videoItems.value.forEach((item, index) => {
+      if (item) {
+        let lastClick = 0
+        item.addEventListener('click', () => {
+          const currentTime = new Date().getTime()
+          if (currentTime - lastClick < 300) {
+            handleVideoDoubleClick(index)
+          }
+          lastClick = currentTime
+        })
+      }
+    })
     playCurrentVideo()
   })
 }, { deep: true })
