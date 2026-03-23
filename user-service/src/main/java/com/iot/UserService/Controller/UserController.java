@@ -7,20 +7,70 @@ import com.iot.UserService.Dto.UserRegisterDTO;
 import com.iot.UserService.Service.UserService;
 import com.iot.UserService.Vo.UserInfoVO;
 import com.iot.UserService.Vo.UserLoginVO;
+import com.iot.commonModules.utils.Jwt.JwtUtils;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import com.iot.UserService.Vo.UserLoginVO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+@Tag(name = "用户管理接口", description = "包含用户注册、登录、查询用户信息等接口") // 控制器注解
 @RestController
-@RequestMapping("/user")
+@RequestMapping
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
 
+    @Autowired
+    private RedisTemplate redisTemplate;
+
+    @GetMapping("/token/1")
+    public String getToken1() {
+        String userId = "11113";
+        String username = "testuser";
+
+        String token = JwtUtils.getToken(Long.parseLong(userId));
+
+        String redisKey = "login:" + token;
+
+        // 用 hash 存多个字段
+        redisTemplate.opsForHash().put(redisKey, "userId", userId);
+        redisTemplate.opsForHash().put(redisKey, "username", username);
+
+        redisTemplate.expire(redisKey, 6000, TimeUnit.SECONDS);
+
+        return token;
+    }
+
+    @GetMapping("/token/2")
+    public String getToken2() {
+        String userId = "66663";
+        String username = "Newtestuser";
+
+        String token = JwtUtils.getToken(Long.parseLong(userId));
+
+        String redisKey = "login:" + token;
+
+        // 用 hash 存多个字段
+        redisTemplate.opsForHash().put(redisKey, "userId", userId);
+        redisTemplate.opsForHash().put(redisKey, "username", username);
+
+        redisTemplate.expire(redisKey, 600, TimeUnit.SECONDS);
+
+        return token;
+    }
+
     // 用户注册
+    @Operation(summary = "用户注册", description = "传入用户名/密码/手机号，完成用户注册，已存在则报错") // 接口注解
     @PostMapping("/register")
     public Result register(@Valid @RequestBody UserRegisterDTO registerDTO) {
         userService.register(registerDTO);
@@ -29,6 +79,7 @@ public class UserController {
     }
 
     // 用户登录
+    @Operation(summary = "用户登录", description = "传入账号/密码，登录成功返回token和用户基础信息")
     @PostMapping("/login")
     public Result login(@Valid @RequestBody UserLoginDTO loginDTO) {
         UserLoginVO loginVO = userService.login(loginDTO);
@@ -37,9 +88,10 @@ public class UserController {
     }
 
     // 查询当前登录用户信息（从请求域获取userId）
+    @Operation(summary = "查询当前登录用户信息", description = "从请求头token解析userId，返回用户详细信息")
     @GetMapping("/info")
     public Result getCurrentUserInfo(HttpServletRequest request) {
-        Long userId = (Long) request.getAttribute("userId");
+        Long userId = Long.valueOf(request.getHeader("iot-User-Id"));
         // 空值校验：userId不存在则抛自定义异常，由全局异常处理器返回标准化错误
         if (userId == null) {
             throw new AllException("未获取到登录用户信息", 401);
@@ -50,6 +102,7 @@ public class UserController {
     }
 
     // 根据用户ID查询用户信息（供其他服务调用，如comment服务）
+    @Operation(summary = "按ID查询用户信息", description = "传入用户ID，返回用户昵称、头像等基础信息，供评论/视频微服务调用")
     @GetMapping("/info/{userId}")
     public Result getUserInfoById(@PathVariable Long userId) {
         // 空值校验：路径参数userId为空则抛自定义异常
@@ -61,6 +114,7 @@ public class UserController {
         return Result.success("查询用户信息成功", infoVO);
     }
 
+    @Operation(summary = "按照ID集合查询用户信息",description = "传入集合ids，返回用户基本信息集合")
     @GetMapping("/ids")
     public List<UserInfoVO> getUserById(@RequestParam List<Long> ids) {
         List<UserInfoVO> infoVOs = userService.getUserInfoByIds(ids);
