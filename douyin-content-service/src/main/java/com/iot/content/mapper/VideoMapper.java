@@ -10,10 +10,10 @@ import java.util.List;
 
 @Mapper
 public interface VideoMapper extends BaseMapper<Videos> {
-    @Delete("update t_video set comment_count = comment_count - 1 where id = #{videoId}")
+    @Delete("update iot_tiktok.t_video set comment_count = comment_count - 1 where id = #{videoId}")
     void reduceCommentCount(Long videoId);
 
-    @Delete("update t_video set comment_count = comment_count + 1 where id = #{videoId}")
+    @Delete("update iot_tiktok.t_video set comment_count = comment_count + 1 where id = #{videoId}")
     void addCommentCount(Long videoId);
 
     void batchUpdateLikeCount(@Param("list") List<Videos> List);

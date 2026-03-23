@@ -9,7 +9,14 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class OpenApiConfig {
 
-
+    @Bean
+    public GroupedOpenApi contentApi() {
+        return GroupedOpenApi.builder()
+                .group("content-service")
+                .packagesToScan("com.iot.content.controller")
+                .pathsToMatch("/follow/**", "/comment/**", "/like/**")
+                .build();
+    }
 
     @Bean
     public OpenAPI customOpenAPI() {

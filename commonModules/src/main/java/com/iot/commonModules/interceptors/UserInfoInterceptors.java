@@ -4,8 +4,10 @@ import cn.hutool.core.util.StrUtil;
 import com.iot.commonModules.utils.UserContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+@Slf4j
 public class UserInfoInterceptors implements HandlerInterceptor {
 
     @Override
@@ -16,6 +18,7 @@ public class UserInfoInterceptors implements HandlerInterceptor {
         // 2. 判断：**不为空**才存入ThreadLocal
         if (StrUtil.isNotBlank(userId)) {
             UserContext.setUser(Long.valueOf(userId));
+            log.info("用户ID：{}", userId);
         }
 
         // 3. 放行

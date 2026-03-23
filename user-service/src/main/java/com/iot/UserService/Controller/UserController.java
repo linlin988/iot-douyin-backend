@@ -12,6 +12,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
@@ -57,5 +59,11 @@ public class UserController {
         UserInfoVO infoVO = userService.getUserInfoById(userId);
         // 适配Result：自定义提示语 + 返回用户信息
         return Result.success("查询用户信息成功", infoVO);
+    }
+
+    @GetMapping("/ids")
+    public List<UserInfoVO> getUserById(@RequestParam List<Long> ids) {
+        List<UserInfoVO> infoVOs = userService.getUserInfoByIds(ids);
+        return infoVOs;
     }
 }

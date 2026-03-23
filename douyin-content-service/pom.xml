@@ -116,6 +116,18 @@
           <groupId>org.springframework.cloud</groupId>
           <artifactId>spring-cloud-starter-openfeign</artifactId>
       </dependency>
+
+      <!-- Spring Cloud LoadBalancer 负载均衡器（OpenFeign必需） -->
+      <dependency>
+          <groupId>org.springframework.cloud</groupId>
+          <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+      </dependency>
+
+      <!-- RabbitMQ -->
+      <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-amqp</artifactId>
+      </dependency>
   </dependencies>
 
     <properties>

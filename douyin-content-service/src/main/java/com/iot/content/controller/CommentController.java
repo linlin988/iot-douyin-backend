@@ -53,7 +53,7 @@ public class CommentController {
      * @return
      */
     @PostMapping("/list/{id}")
-   @Operation(description = "获取当前评论列表")
+    @Operation(description = "获取当前评论列表")
     public Result listComment(
             @PathVariable("id") Long videoId, @RequestBody pageQuery pageQuery){
         return commentService.listComment(videoId, pageQuery);

@@ -19,6 +19,7 @@ import java.util.Map;
 public class GlobalErrorHandler extends AbstractErrorWebExceptionHandler {
 
     // 构造函数注入必要组件
+
     public GlobalErrorHandler(
             ErrorAttributes errorAttributes,
             WebProperties webProperties,          // 包含静态资源配置

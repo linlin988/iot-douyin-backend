@@ -1,4 +1,5 @@
 package com.iot.UserService.Service;
+import com.iot.commonModules.DTO.PageDTO;
 import com.iot.commonModules.utils.Jwt.JwtUtils;
 import com.iot.commonModules.utils.PasswordUtil.PasswordUtil;
 import com.iot.UserService.Dto.UserLoginDTO;
@@ -12,7 +13,11 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.management.Query;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl extends com.baomidou.mybatisplus.extension.service.impl.ServiceImpl<UserMapper,User> implements UserService {
@@ -73,6 +78,19 @@ public class UserServiceImpl extends com.baomidou.mybatisplus.extension.service.
     public User getByAccount(String account) {
         return UserMapper.selectByAccount(account);
     }
+
+    @Override
+    public List<UserInfoVO> getUserInfoByIds(List<Long> ids) {
+        List<User> users = userMapper.selectBatchIds(ids);
+        return users.stream()
+                .map(user -> {
+                    UserInfoVO infoVO = new UserInfoVO();
+                    BeanUtils.copyProperties(user, infoVO);
+                    return infoVO;
+                })
+                .collect(Collectors.toList());
+    }
+
 }
 
 

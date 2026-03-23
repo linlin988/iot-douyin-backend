@@ -62,7 +62,7 @@ public class UserTestController {
         String userId = "11113";
         String username = "testuser";
 
-        String token = JwtUtils.getToken(userId);
+        String token = JwtUtils.getToken(Long.parseLong(userId));
 
         String redisKey = "login:" + token;
 
@@ -81,7 +81,7 @@ public class UserTestController {
         String userId = "66663";
         String username = "Newtestuser";
 
-        String token = JwtUtils.getToken(userId);
+        String token = JwtUtils.getToken(Long.parseLong(userId));
 
         String redisKey = "login:" + token;
 
@@ -89,7 +89,7 @@ public class UserTestController {
         redisTemplate.opsForHash().put(redisKey, "userId", userId);
         redisTemplate.opsForHash().put(redisKey, "username", username);
 
-        redisTemplate.expire(redisKey, 600, TimeUnit.SECONDS);
+        redisTemplate.expire(redisKey, 60000, TimeUnit.SECONDS);
 
         return token;
     }
