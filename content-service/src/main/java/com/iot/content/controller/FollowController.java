@@ -93,4 +93,14 @@ public class FollowController {
        return followService.getFansCountByUserId();
    }
 
+   /**
+    * 查询共同关注列表
+    * @param itsId
+    * @return
+    */
+   @Operation(summary = "查询共同关注列表")
+   @GetMapping("/commonFollowList/{id}")
+   public Result commonFollowList(@PathVariable ("id") Long itsId) {
+      return followService.getCommonFollowList(itsId);
+  }
 }

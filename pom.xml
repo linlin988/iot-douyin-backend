@@ -129,6 +129,26 @@
                 <version>4.5.0</version>
             </dependency>
 
+            <!-- Elasticsearch -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+                <version>3.0.13</version>
+            </dependency>
+
+            <!-- Elasticsearch High Level REST Client -->
+            <dependency>
+                <groupId>co.elastic.clients</groupId>
+                <artifactId>elasticsearch-rest-high-level-client</artifactId>
+                <version>8.5.3</version>
+            </dependency>
+
+            <!-- Elasticsearch Java API Client -->
+            <dependency>
+                <groupId>co.elastic.clients</groupId>
+                <artifactId>elasticsearch-java</artifactId>
+                <version>8.5.3</version>
+            </dependency>
 
         </dependencies>
 

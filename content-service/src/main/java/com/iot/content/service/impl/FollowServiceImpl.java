@@ -1,10 +1,14 @@
 package com.iot.content.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.iot.commonModules.DTO.PageDTO;
 import com.iot.commonModules.DTO.pageQuery;
+import com.iot.commonModules.FeignClient.UserClient;
+import com.iot.commonModules.VO.UserInfoVO;
 import com.iot.commonModules.common.Result;
 import com.iot.commonModules.entity.Follows;
 import com.iot.commonModules.entity.User;
@@ -15,10 +19,13 @@ import com.iot.content.mapper.FollowMapper;
 import com.iot.content.mapper.UserMapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -27,6 +34,14 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper,Follows> impleme
 
     @Resource
     UserMapper userMapper;
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
+
+    @Resource
+    private UserClient  userClient;
+
+
 
     /**
      * 添加关注或取消关注
@@ -38,22 +53,29 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper,Follows> impleme
 
         //获取当前用户id
         Long followUserId = UserContext.getUser();
-
+        String key = "follow:" + followUserId;
         //1.根据follow确定是否关注
         if (follow) {
             //2.取关，删除数据
-            remove(new QueryWrapper<Follows>().eq("followed_user_id", followedUserId)
+            boolean remove = remove(new QueryWrapper<Follows>().eq("followed_user_id", followedUserId)
                     .eq("follow_user_id", followUserId));
-            userMapper.updateFollowCount(followUserId, -1); // 取关，减少关注者关注数
-            userMapper.updateFansCount(followedUserId, -1); // 取关，减少被关注者粉丝数
+            if ( remove) {
+                userMapper.updateFollowCount(followUserId, -1); // 取关，减少关注者关注数
+                userMapper.updateFansCount(followedUserId, -1);
+                stringRedisTemplate.opsForSet().remove(key, followedUserId.toString());
+            }// 取关，减少被关注者粉丝数
         } else {
             Follows follows = new Follows();
             follows.setFollowedUserId(followedUserId);
             follows.setFollowUserId(followUserId);
             //3.关注，新增数据
-            save(follows);
-            userMapper.updateFollowCount(followUserId, 1);// 关注，增加关注者关注数
-            userMapper.updateFansCount(followedUserId, 1);// 关注，增加被关注者粉丝数
+            boolean save = save(follows);
+            if (save) {
+                //sadd 把被关注者ID加入redis的set集合
+                stringRedisTemplate.opsForSet().add(key, followedUserId.toString());
+                userMapper.updateFollowCount(followUserId, 1); // 关注，增加关注者关注数
+                userMapper.updateFansCount(followedUserId, 1); // 关注，增加被关注者粉丝数
+            }
         }
         return Result.success();
     }
@@ -75,36 +97,34 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper,Follows> impleme
 
     @Override
     public Result getMyFollowList(pageQuery pageQuery) {
-        // 1.获取当前登录用户
         Long followUserId = UserContext.getUser();
-        
-        // 2.构建分页对象，使用默认按创建时间倒序排序
         Page<Follows> page = pageQuery.toMpPageDefaultSortByCreateTimeDesc();
-        
-        // 3.执行分页查询，查询我关注的用户（即我作为关注者的记录）
         Page<Follows> followsPage = query()
                 .eq("follow_user_id", followUserId)
                 .page(page);
 
-
-        List<Long> userIds = followsPage.getRecords().stream()
-        .map(Follows::getFollowedUserId)
-        .collect(Collectors.toList());
-
-        // 如果没有关注记录，直接返回空结果
-        if (userIds.isEmpty()) {
-            PageDTO<FollowsVO> emptyPage = PageDTO.of(followsPage, follows -> null);
-            return Result.success(emptyPage);
+        if (followsPage.getRecords().isEmpty()) {
+            return Result.success(PageDTO.empty(followsPage));
         }
 
-        List<User> users = userMapper.selectBatchIds(userIds);
-        Map<Long, User> userMap = users.stream()
-        .collect(Collectors.toMap(User::getId, u -> u));
+        List<Long> userIds = followsPage.getRecords().stream()
+                .map(Follows::getFollowedUserId)
+                .collect(Collectors.toList());
 
-        PageDTO<FollowsVO> voPage = PageDTO.of(followsPage, follows -> {
-        User user = userMap.get(follows.getFollowedUserId());
-        return new FollowsVO(user.getAvatar(), user.getNickname());
+        List<UserInfoVO> userInfoList = userClient.getUserInfoByIds(userIds);
+
+        Map<Long, UserInfoVO> userMap = userInfoList.stream()
+                .collect(Collectors.toMap(UserInfoVO::getId, user -> user, (v1, v2) -> v1));
+
+        PageDTO<FollowsVO> voPage = PageDTO.of(followsPage, follow -> {
+            UserInfoVO user = userMap.get(follow.getFollowedUserId());
+            if (user == null) {
+                return new FollowsVO("", "未知用户");
+            }
+            return new FollowsVO(user.getAvatar(), user.getUsername());
         });
+
+        return Result.success(voPage);
 
 //        // 5.遍历关注列表，查询每个被关注用户的头像和昵称
 //        for (Follows follows : followsPage.getRecords()) {
@@ -117,10 +137,6 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper,Follows> impleme
 //                );
 //                voPage.getRecords().add(followsVO);
 //            }
-
-        
-        // 6.返回分页结果
-        return Result.success(voPage);
     }
 
     @Override
@@ -136,7 +152,7 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper,Follows> impleme
                 .eq("followed_user_id", followUserId)
                 .page(page);
 
-
+        // 4.从关注记录中提取粉丝ID
         List<Long> userIds = followsPage.getRecords().stream()
                 .map(Follows::getFollowUserId)
                 .collect(Collectors.toList());
@@ -147,15 +163,19 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper,Follows> impleme
             return Result.success(emptyPage);
         }
 
-        List<User> users = userMapper.selectBatchIds(userIds);
-        Map<Long, User> userMap = users.stream()
-                .collect(Collectors.toMap(User::getId, u -> u));
+        List<UserInfoVO> userInfoList = userClient.getUserInfoByIds(userIds);
 
-        PageDTO<FollowsVO> voPage = PageDTO.of(followsPage, follows -> {
-            User user = userMap.get(follows.getFollowUserId());
-            return new FollowsVO(user.getAvatar(), user.getNickname());
+        // 5.将粉丝信息转换为VO
+        Map<Long, UserInfoVO> userMap = userInfoList.stream()
+                .collect(Collectors.toMap(UserInfoVO::getId, user -> user, (v1, v2) -> v1));
+
+        PageDTO<FollowsVO> voPage = PageDTO.of(followsPage, follow -> {
+            UserInfoVO user = userMap.get(follow.getFollowUserId());
+            if (user == null) {
+                return new FollowsVO("", "未知用户");
+            }
+            return new FollowsVO(user.getAvatar(), user.getUsername());
         });
-
 
         return Result.success(voPage);
     }
@@ -182,8 +202,23 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper,Follows> impleme
         return Result.success(count);
     }
 
+    @Override
+    public Result getCommonFollowList(Long itsId) {
+        Long  userId = UserContext.getUser();
+        String key = "follow:" + userId ;
+        String key2 = "follow:" + itsId;
 
+        Set<String> commonFollows = stringRedisTemplate.opsForSet().intersect(key, key2);
+
+        if (CollUtil.isNotEmpty(commonFollows)){
+        List<Long> commonFollowIds = commonFollows.stream().map(Long::valueOf).collect(Collectors.toList());
+        List<UserInfoVO> userInfoList = userClient.getUserInfoByIds(commonFollowIds);
+
+        List<FollowsVO> voList = userInfoList.stream()
+                .map(user -> new FollowsVO(user.getAvatar(), user.getUsername()))
+                .collect(Collectors.toList());
+        return Result.success(voList);
+        }
+        else return Result.success(Collections.emptyList());
+    }
 }
-
-
-

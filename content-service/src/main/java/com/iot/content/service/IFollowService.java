@@ -18,4 +18,6 @@ public interface IFollowService extends IService<Follows> {
     Result getFollowCountByUserId();
 
     Result getFansCountByUserId();
+
+    Result getCommonFollowList(Long itsId);
 }
