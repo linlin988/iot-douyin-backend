@@ -6,7 +6,9 @@ import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import lombok.extern.slf4j.Slf4j;
 @Configuration
+@Slf4j
 public class RabbitMqConfig {
 
     public static final String LIKE_EXCHANGE = "like.exchange";
@@ -16,6 +18,7 @@ public class RabbitMqConfig {
     // 点赞交换机
     @Bean
     public DirectExchange likeExchange() {
+        log.info("创建点赞交换机");
         return new DirectExchange(LIKE_EXCHANGE, true, false);
     }
 
