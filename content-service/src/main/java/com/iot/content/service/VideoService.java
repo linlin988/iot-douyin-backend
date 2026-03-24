@@ -1,6 +1,6 @@
 package com.iot.content.service;
 
-
+import com.iot.commonModules.common.Result;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.iot.commonModules.entity.Videos;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,4 +18,5 @@ public interface VideoService {
 
     //视频详情与播放数统计
     Videos getVideoDetail(Long videoId);
+    Result getUserWorksByUserId(Long userId);
 }
