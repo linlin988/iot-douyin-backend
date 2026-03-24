@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.iot.commonModules.entity.Videos;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 public interface VideoService {
 
     //视频上传
@@ -19,5 +21,6 @@ public interface VideoService {
     //视频详情与播放数统计
     Videos getVideoDetail(Long videoId);
 
+    //查询用户发布的所有视频
     Result getUserWorksByUserId(Long userId);
 }

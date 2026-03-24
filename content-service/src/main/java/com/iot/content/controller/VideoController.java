@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 
 
 @RestController
@@ -45,6 +46,7 @@ public class VideoController {
     }
 
     //视频删除
+    @Operation(summary = "视频删除")
     @DeleteMapping("/delete/{videoId}")
     public Result deleteVideo(@PathVariable Long videoId, @RequestHeader("userId") Long userId) throws Exception {
         boolean isSuccess =videoService.deleteVideo(videoId, userId);
@@ -55,6 +57,7 @@ public class VideoController {
 
 
     //视频列表查询
+    @Operation(summary = "视频列表分页查询")
     @GetMapping("/list")
     public Result getVideoList(
             @RequestParam(defaultValue = "1") int page,
@@ -71,6 +74,8 @@ public class VideoController {
         Videos video = videoService.getVideoDetail(videoId);
         return Result.success(video);
     }
+
+
     // 查询当前用户发布的视频列表（给用户服务调用）
     @Operation(summary = "根据用户ID查询该用户发布的所有视频ID")
     @GetMapping("/user/works/{userId}")
