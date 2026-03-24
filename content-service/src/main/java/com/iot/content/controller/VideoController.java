@@ -3,6 +3,7 @@ package com.iot.content.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.iot.commonModules.common.Result;
 import com.iot.commonModules.entity.Videos;
+import com.iot.commonModules.utils.UserContext;
 import com.iot.content.service.VideoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,10 +28,10 @@ public class VideoController {
         @RequestParam("file") MultipartFile file,
         @RequestParam("coverfile" ) MultipartFile coverfile,
         @RequestParam("title") String title,
-        @RequestParam("description") String description,
-        @RequestHeader("userId") Long userId) throws Exception {
+        @RequestParam("description") String description) throws Exception {
 
         //空文件判断
+        Long userId = UserContext.getUser();
         if (file.isEmpty()) {
             return Result.error(500, "视频文件不能为空");
         }

@@ -8,7 +8,7 @@ import com.iot.commonModules.entity.Likes;
 public interface ILikeService extends IService<Likes> {
     Result likeVideo(Long videoId);
 
-    Result isLike(Long videoId, Long userId);
+    Result isLike(Long videoId);
 
     Result likeCount(Long videoId);
 }

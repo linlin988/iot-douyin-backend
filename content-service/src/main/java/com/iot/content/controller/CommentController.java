@@ -32,6 +32,7 @@ public class CommentController {
     @PostMapping("/add")
     @Operation(description = "发布评论")
     public Result addComment(@RequestBody CommentDTO commentDTO){
+        log.info("发布评论：{}", commentDTO);
         return commentService.addComment(commentDTO);
     }
 

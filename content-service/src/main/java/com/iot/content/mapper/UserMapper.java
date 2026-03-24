@@ -14,7 +14,7 @@ public interface UserMapper extends BaseMapper<User> {
      * @param followUserId
      * @param delta 变化量 (正数增加，负数减少)
      */
-    @Update("update iot_tiktok.t_user set follow_count = follow_count + #{delta} where id = #{followUserId}")
+    @Update("update t_user set follow_count = follow_count + #{delta} where id = #{followUserId}")
     void updateFollowCount(@Param("followUserId") Long followUserId, @Param("delta") int delta);
 
     /**
@@ -22,7 +22,7 @@ public interface UserMapper extends BaseMapper<User> {
      * @param followedUserId
      * @param delta 变化量 (正数增加，负数减少)
      */
-    @Update("update iot_tiktok.t_user set fan_count = fan_count + #{delta} where id = #{followedUserId}")
+    @Update("update t_user set fan_count = fan_count + #{delta} where id = #{followedUserId}")
     void updateFansCount(@Param("followedUserId") Long followedUserId, @Param("delta") int delta);
 
     /**
@@ -30,7 +30,7 @@ public interface UserMapper extends BaseMapper<User> {
      * @param userId
      * @return
      */
-    @Select("select follow_count from iot_tiktok.t_user where id = #{userId}")
+    @Select("select follow_count from t_user where id = #{userId}")
     Integer queryFollowCount(Long userId);
 
     /**
@@ -38,6 +38,6 @@ public interface UserMapper extends BaseMapper<User> {
      * @param userId
      * @return
      */
-    @Select("select fan_count from iot_tiktok.t_user where id = #{userId}")
+    @Select("select fan_count from t_user where id = #{userId}")
     Integer queryFansCount(Long userId);
 }

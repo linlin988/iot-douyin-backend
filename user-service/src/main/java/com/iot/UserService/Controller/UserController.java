@@ -8,6 +8,7 @@ import com.iot.UserService.Service.UserService;
 import com.iot.UserService.Vo.UserInfoVO;
 import com.iot.UserService.Vo.UserLoginVO;
 import com.iot.commonModules.utils.Jwt.JwtUtils;
+import com.iot.commonModules.utils.UserContext;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -18,6 +19,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import com.iot.UserService.Vo.UserLoginVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,7 +37,7 @@ public class UserController {
 
     @GetMapping("/token/1")
     public String getToken1() {
-        String userId = "11113";
+        String userId = "1234";
         String username = "testuser";
 
         String token = JwtUtils.getToken(Long.parseLong(userId));
@@ -46,14 +48,14 @@ public class UserController {
         redisTemplate.opsForHash().put(redisKey, "userId", userId);
         redisTemplate.opsForHash().put(redisKey, "username", username);
 
-        redisTemplate.expire(redisKey, 6000, TimeUnit.SECONDS);
+        redisTemplate.expire(redisKey, 600, TimeUnit.SECONDS);
 
         return token;
     }
 
     @GetMapping("/token/2")
     public String getToken2() {
-        String userId = "66663";
+        String userId = "6663";
         String username = "Newtestuser";
 
         String token = JwtUtils.getToken(Long.parseLong(userId));
@@ -90,8 +92,8 @@ public class UserController {
     // 查询当前登录用户信息（从请求域获取userId）
     @Operation(summary = "查询当前登录用户信息", description = "从请求头token解析userId，返回用户详细信息")
     @GetMapping("/info")
-    public Result getCurrentUserInfo(HttpServletRequest request) {
-        Long userId = Long.valueOf(request.getHeader("iot-User-Id"));
+    public Result getCurrentUserInfo() {
+       Long userId = UserContext.getUser();
         // 空值校验：userId不存在则抛自定义异常，由全局异常处理器返回标准化错误
         if (userId == null) {
             throw new AllException("未获取到登录用户信息", 401);

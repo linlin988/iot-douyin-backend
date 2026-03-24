@@ -7,6 +7,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -31,6 +32,7 @@ import java.util.Map;
         return token;
  */
 
+@Slf4j
 @Component
 public class JwtUtils {
     //用户的用户名
@@ -43,6 +45,7 @@ public class JwtUtils {
 
     public static String getToken(long userId) {
 
+        log.info("开始生成token");
         //获取jwt生成器
         JWTCreator.Builder jwtBuilder = JWT.create();
 

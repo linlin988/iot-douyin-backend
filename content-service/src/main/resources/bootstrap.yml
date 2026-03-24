@@ -3,17 +3,20 @@ spring:
     name: content-service
   profiles:
     active: dev
-  config:
-    import: optional:nacos:content-service-dev.yml
+  # 重点：必须把 nacos 配置写在 bootstrap 上下文里
   cloud:
     nacos:
       username: nacos
       password: nacos
+      # 远程服务器地址
+      server-addr: 121.41.228.22:8848
       discovery:
-        server-addr: 121.41.228.22:8848
+        server-addr: ${spring.cloud.nacos.server-addr}
       config:
-        server-addr: 121.41.228.22:8848
+        server-addr: ${spring.cloud.nacos.server-addr}
         file-extension: yml
+        # 对应你 import 的配置文件
+        data-id: content-service-dev.yml
 
 
 #  data:

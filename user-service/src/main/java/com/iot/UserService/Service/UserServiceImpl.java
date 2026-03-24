@@ -10,6 +10,7 @@ import com.iot.UserService.Vo.UserInfoVO;
 import com.iot.UserService.Vo.UserLoginVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,12 +24,13 @@ import java.util.stream.Collectors;
 public class UserServiceImpl extends com.baomidou.mybatisplus.extension.service.impl.ServiceImpl<UserMapper,User> implements UserService {
     private final PasswordUtil passwordUtil;
     private final JwtUtils jwtUtil;
-    private final UserMapper userMapper;
+    @Autowired
+    UserMapper userMapper;
     @Override
     @Transactional(rollbackFor = Exception.class)
     //注册时检验用户是否存在
     public void register(UserRegisterDTO registerDTO){
-        User existUser=UserMapper.selectByAccount(registerDTO.getAccount());
+        User existUser=userMapper.selectByAccount(registerDTO.getAccount());
         if(existUser!=null){
             throw new RuntimeException("用户名/手机号已经存在");
         }
@@ -37,8 +39,6 @@ public class UserServiceImpl extends com.baomidou.mybatisplus.extension.service.
         User user=new User();
         user.setUsername(registerDTO.getAccount());//设置用户名
         user.setPassword(encryptedPwd);//设置加密密码
-        user.setCreate_time(LocalDateTime.now());//设置创建时间
-        user.setUpdate_time(LocalDateTime.now());//设置更新时间
         user.setPhone(registerDTO.getAccount());//设置手机号
         user.setFan_count(0);
         user.setFollow_count(0);
@@ -47,7 +47,7 @@ public class UserServiceImpl extends com.baomidou.mybatisplus.extension.service.
     @Override
     public UserLoginVO login(UserLoginDTO loginDTO) {
         // 1. 校验用户是否存在
-        User user = UserMapper.selectByAccount(loginDTO.getAccount());
+        User user = userMapper.selectByAccount(loginDTO.getAccount());
         if (user == null) {
             throw new RuntimeException("用户不存在");
         }
@@ -76,7 +76,7 @@ public class UserServiceImpl extends com.baomidou.mybatisplus.extension.service.
 
     @Override
     public User getByAccount(String account) {
-        return UserMapper.selectByAccount(account);
+        return userMapper.selectByAccount(account);
     }
 
     @Override
