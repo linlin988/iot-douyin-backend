@@ -67,7 +67,8 @@ public class GlobalFilterConfig implements GlobalFilter, Ordered {
 
 
         // 5.从 Redis 获取用户信息
-        String userId = (String) redisTemplate.opsForHash().get(redisKey, "userId");
+        Object userIdObj = redisTemplate.opsForHash().get(redisKey, "userId");
+        String userId = userIdObj != null ? userIdObj.toString() : null;
         String username = (String) redisTemplate.opsForHash().get(redisKey, "username");
 
 
