@@ -4,6 +4,7 @@ import com.iot.commonModules.utils.Jwt.JwtUtils;
 import com.iot.commonModules.utils.PasswordUtil.PasswordUtil;
 import com.iot.UserService.Dto.UserLoginDTO;
 import com.iot.UserService.Dto.UserRegisterDTO;
+import com.iot.UserService.Dto.UserUpdateDTO;
 import com.iot.UserService.Entity.User;
 import com.iot.UserService.Mapper.UserMapper;
 import com.iot.UserService.Vo.UserInfoVO;
@@ -13,7 +14,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.springframework.util.StringUtils;
 import javax.management.Query;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -89,6 +90,37 @@ public class UserServiceImpl extends com.baomidou.mybatisplus.extension.service.
                     return infoVO;
                 })
                 .collect(Collectors.toList());
+    }
+    //修改用户信息
+    @Override
+    @Transactional(rollbackFor = Exception.class) // 事务保证原子性
+    public void updateUserInfo(Long userId, UserUpdateDTO updateDTO) {
+        // 1. 基础校验：用户是否存在
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+
+        // 2. 更新头像+昵称（
+        // 空值处理：不传则保留原有值，避免更新为null
+        String finalAvatar = StringUtils.hasText(updateDTO.getAvatar()) ? updateDTO.getAvatar() : user.getAvatar();
+        String finalNickname = StringUtils.hasText(updateDTO.getNickname()) ? updateDTO.getNickname() : user.getUsername(); // 你实体类用的是username，数据库是nickname？需确认字段映射
+        if (!finalAvatar.equals(user.getAvatar()) || !finalNickname.equals(user.getUsername())) {
+            userMapper.updateUserInfo(userId, finalAvatar, finalNickname);
+            // 同步更新update_time（你原有代码有update_time字段）
+            user.setUpdateTime(LocalDateTime.now());
+            userMapper.updateById(user); // 仅更新时间，不影响其他字段
+        }
+
+        // 3. 更新关注数
+        if (updateDTO.getFollowCountDelta() != null) {
+            userMapper.updateFollowCount(updateDTO.getFollowCountDelta(), userId);
+        }
+
+        // 4. 更新粉丝数
+        if (updateDTO.getFanCountDelta() != null) {
+            userMapper.updateFanCount(userId, updateDTO.getFanCountDelta());
+        }
     }
 
 }

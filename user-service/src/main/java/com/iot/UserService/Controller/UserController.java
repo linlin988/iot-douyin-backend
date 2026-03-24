@@ -4,12 +4,15 @@ import com.iot.commonModules.common.AllException;
 import com.iot.commonModules.common.Result;
 import com.iot.UserService.Dto.UserLoginDTO;
 import com.iot.UserService.Dto.UserRegisterDTO;
+import com.iot.UserService.Dto.UserUpdateDTO;
 import com.iot.UserService.Service.UserService;
 import com.iot.UserService.Vo.UserInfoVO;
 import com.iot.UserService.Vo.UserLoginVO;
 import com.iot.commonModules.utils.Jwt.JwtUtils;
 import com.iot.commonModules.utils.UserContext;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -71,7 +74,7 @@ public class UserController {
         return token;
     }
 
-    // 用户注册
+    // 用户注册接口
     @Operation(summary = "用户注册", description = "传入用户名/密码/手机号，完成用户注册，已存在则报错") // 接口注解
     @PostMapping("/register")
     public Result register(@Valid @RequestBody UserRegisterDTO registerDTO) {
@@ -80,7 +83,7 @@ public class UserController {
         return Result.success("注册成功！");
     }
 
-    // 用户登录
+    // 用户登录接口
     @Operation(summary = "用户登录", description = "传入账号/密码，登录成功返回token和用户基础信息")
     @PostMapping("/login")
     public Result login(@Valid @RequestBody UserLoginDTO loginDTO) {
@@ -89,7 +92,7 @@ public class UserController {
         return Result.success("登录成功！", loginVO);
     }
 
-    // 查询当前登录用户信息（从请求域获取userId）
+    // 查询当前登录用户信息接口
     @Operation(summary = "查询当前登录用户信息", description = "从请求头token解析userId，返回用户详细信息")
     @GetMapping("/info")
     public Result getCurrentUserInfo() {
@@ -103,7 +106,7 @@ public class UserController {
         return Result.success("查询当前用户信息成功", infoVO);
     }
 
-    // 根据用户ID查询用户信息（供其他服务调用，如comment服务）
+    // 根据用户ID查询用户信息
     @Operation(summary = "按ID查询用户信息", description = "传入用户ID，返回用户昵称、头像等基础信息，供评论/视频微服务调用")
     @GetMapping("/info/{userId}")
     public Result getUserInfoById(@PathVariable Long userId) {
@@ -121,5 +124,27 @@ public class UserController {
     public List<UserInfoVO> getUserById(@RequestParam List<Long> ids) {
         List<UserInfoVO> infoVOs = userService.getUserInfoByIds(ids);
         return infoVOs;
+    }
+    //修改用户登录信息接口
+    @Operation(
+            summary = "修改当前登录用户信息",
+            description = "从请求头iot-User-Id获取用户ID，支持修改昵称、头像、关注数增量、粉丝数增量",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "修改成功"),
+                    @ApiResponse(responseCode = "401", description = "未获取到登录用户信息"),
+                    @ApiResponse(responseCode = "500", description = "用户不存在或修改失败")
+            }
+    )
+    @PutMapping("/info")
+    public Result updateCurrentUserInfo(
+            HttpServletRequest request,
+            @Valid @RequestBody UserUpdateDTO updateDTO
+    ) {
+        Long userId = Long.valueOf(request.getHeader("iot-User-Id"));
+        if (userId == null) {
+            throw new AllException("未获取到登录用户信息", 401);
+        }
+        userService.updateUserInfo(userId, updateDTO);
+        return Result.success("用户信息修改成功！");
     }
 }
