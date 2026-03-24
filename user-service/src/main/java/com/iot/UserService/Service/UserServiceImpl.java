@@ -1,5 +1,4 @@
 package com.iot.UserService.Service;
-import com.iot.commonModules.DTO.PageDTO;
 import com.iot.commonModules.utils.Jwt.JwtUtils;
 import com.iot.commonModules.utils.PasswordUtil.PasswordUtil;
 import com.iot.UserService.Dto.UserLoginDTO;
@@ -17,12 +16,13 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-import javax.management.Query;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
+import com.iot.UserService.Feign.VideoFeignClient;
+import com.iot.commonModules.common.Result;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl extends com.baomidou.mybatisplus.extension.service.impl.ServiceImpl<UserMapper,User> implements UserService {
@@ -143,24 +143,27 @@ public class UserServiceImpl extends com.baomidou.mybatisplus.extension.service.
         return user.getAvatar();
     }
 
+    @Autowired
+    private VideoFeignClient videoFeignClient; // 注入feign
+
+    // 查询用户作品
     @Override
     public List<String> getUserWorks(Long userId) {
-        // 这里先返回模拟数据，后续你对接视频微服务可直接替换
-        User user = userMapper.selectById(userId);
-        if (user == null) {
-            throw new RuntimeException("用户不存在");
+        Result result = videoFeignClient.getUserWorks(userId);
+        if (result == null || !"200".equals(result.getCode())) {
+            throw new RuntimeException("获取作品失败");
         }
-        return List.of("作品1","作品2","作品3");
+        return (List<String>) result.getData();
     }
 
+    // 查询用户点赞列表
     @Override
     public List<Long> getUserLikeList(Long userId) {
-        // 这里先返回模拟点赞视频ID列表
-        User user = userMapper.selectById(userId);
-        if (user == null) {
-            throw new RuntimeException("用户不存在");
+        Result result = videoFeignClient.getUserLikeList(userId);
+        if (result == null || !"200".equals(result.getCode())) {
+            throw new RuntimeException("获取点赞列表失败");
         }
-        return List.of(1001L,1002L,1003L);
+        return (List<Long>) result.getData();
     }
 
 }
