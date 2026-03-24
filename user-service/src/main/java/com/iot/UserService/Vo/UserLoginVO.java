@@ -5,7 +5,7 @@ import lombok.Data;
 @Schema(name = "UserLoginVO", description = "用户登录返回结果")
 public class UserLoginVO {//登录返回vo
     @Schema(description = "用户ID", example = "1")
-    private long id;//用户id
+    private Long id;//用户id
 
     @Schema(description = "用户名", example = "zhangsan123")
     private String username;//用户名

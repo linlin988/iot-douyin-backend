@@ -42,12 +42,12 @@ public class LikeServiceImpl extends ServiceImpl<LikeMapper, Likes> implements I
     @Override
     public Result likeVideo(Long videoId) {
         Long userId = UserContext.getUser();
+        log.info("当前登录用户ID：{}", userId);
         Long authorId = videoMapper.selectById(videoId).getUserId();
 
         String userSetKey = LIKE_USER_KEY + videoId;
         String userIdStr = userId.toString();
-
-        // 判断是否已点赞
+        log.info("当前登录用户ID：{}", userIdStr);        // 判断是否已点赞
         Boolean isMember = stringRedisTemplate.opsForSet().isMember(userSetKey, userIdStr);
 
         if (BooleanUtil.isFalse(isMember)) {
@@ -65,6 +65,7 @@ public class LikeServiceImpl extends ServiceImpl<LikeMapper, Likes> implements I
             dto.setUserId(userId);
             dto.setAuthorId(authorId);
             dto.setIsLiked(true);
+            log.debug("点赞消息：{}", dto);
             likeMassageService.sendLikeMessage(dto);
         } else {
             // 取消点赞：原子删除
@@ -87,7 +88,7 @@ public class LikeServiceImpl extends ServiceImpl<LikeMapper, Likes> implements I
         ArrayList<String> videoIdSet = (ArrayList<String>) stringRedisTemplate.opsForSet().pop(DIRTY_KEY, 50);
 
         if (CollUtil.isEmpty(videoIdSet)) {
-//            log.info("脏数据为空");
+            log.info("脏数据为空");
             return;
         }
         log.info("脏数据-非-空");
@@ -161,7 +162,8 @@ public class LikeServiceImpl extends ServiceImpl<LikeMapper, Likes> implements I
 //    }
 //
     @Override
-    public Result isLike(Long videoId, Long userId) {
+    public Result isLike(Long videoId) {
+        Long userId = UserContext.getUser();
         Boolean isLike = stringRedisTemplate.opsForSet().isMember("like:" + videoId, userId.toString());
         return Result.success(isLike);
     }

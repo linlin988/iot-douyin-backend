@@ -25,7 +25,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
 @Service
+@Slf4j
 public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comments> implements ICommentService {
 
    @Resource
@@ -117,7 +119,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comments> imp
     public Result addComment(CommentDTO commentDTO) {
 
         Long userId = UserContext.getUser();
-
+        log.info("当前登录用户ID：{}", userId);
         if (StrUtil.isNotBlank(commentDTO.getContent())) {
             Comments comments = BeanUtil.copyProperties(commentDTO, Comments.class);
             comments.setUserId(userId);
