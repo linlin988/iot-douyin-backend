@@ -11,4 +11,5 @@ public interface ILikeService extends IService<Likes> {
     Result isLike(Long videoId);
 
     Result likeCount(Long videoId);
+    Result getUserLikeVideoList(Long userId);
 }

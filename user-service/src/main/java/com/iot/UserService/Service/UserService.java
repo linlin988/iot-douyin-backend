@@ -31,4 +31,10 @@ public interface UserService extends IService<User> {
      * @param updateDTO 修改参数（昵称、头像、关注数增量、粉丝数增量）
      */
     void updateUserInfo(Long userId, UserUpdateDTO updateDTO);
+    //查询用户头像地址
+    String getUserAvatar(Long userId);
+    //查询用户作品
+    List<String> getUserWorks(Long userId);
+    //查询用户点赞列表
+    List<Long> getUserLikeList(Long userId);
 }

@@ -11,3 +11,4 @@ public interface UserFeignClient {
     @GetMapping("/user/info/{userId}")
     Result getUserInfoById(@PathVariable(value = "userId") Long userId);
 }
+

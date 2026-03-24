@@ -71,6 +71,12 @@ public class VideoController {
         Videos video = videoService.getVideoDetail(videoId);
         return Result.success(video);
     }
+    // 查询当前用户发布的视频列表（给用户服务调用）
+    @Operation(summary = "根据用户ID查询该用户发布的所有视频ID")
+    @GetMapping("/user/works/{userId}")
+    public Result getUserWorksByUserId(@PathVariable Long userId) {
+        return videoService.getUserWorksByUserId(userId);
+    }
 }
 
 

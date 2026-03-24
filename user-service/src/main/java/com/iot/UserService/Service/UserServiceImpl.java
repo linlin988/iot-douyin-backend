@@ -122,6 +122,34 @@ public class UserServiceImpl extends com.baomidou.mybatisplus.extension.service.
             userMapper.updateFanCount(userId, updateDTO.getFanCountDelta());
         }
     }
+    @Override
+    public String getUserAvatar(Long userId) {
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        return user.getAvatar();
+    }
+
+    @Override
+    public List<String> getUserWorks(Long userId) {
+        // 这里先返回模拟数据，后续你对接视频微服务可直接替换
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        return List.of("作品1","作品2","作品3");
+    }
+
+    @Override
+    public List<Long> getUserLikeList(Long userId) {
+        // 这里先返回模拟点赞视频ID列表
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        return List.of(1001L,1002L,1003L);
+    }
 
 }
 
