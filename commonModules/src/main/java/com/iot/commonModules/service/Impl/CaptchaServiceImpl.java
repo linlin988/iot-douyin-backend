@@ -51,8 +51,10 @@ public class CaptchaServiceImpl implements CaptchaService {
         if (StringUtils.isNotEmpty(loginRequest.getUsername())) {
             captchaKey = CAPTCHA_KEY + loginRequest.getUsername().trim() + ":" + UUID.randomUUID().toString().replaceAll("-", "");
         }
-        redisUtil.set(captchaKey, captchaText, CAPTCHA_TIME_OUT); // 存入Redis
-        response.setHeader("Captcha-Key", captchaKey); // 响应头返回Key给前端
+        String SetKey = "captcha:" + captchaKey;
+        redisUtil.set(SetKey, captchaText, CAPTCHA_TIME_OUT); // 存入Redis
+        response.setHeader("SetKey", SetKey); // 响应头返回Key给前端
+        response.setHeader("Access-Control-Expose-Headers", "SetKey");
 
         BufferedImage image = defaultKaptcha.createImage(captchaText);
         ServletOutputStream outputStream = null;

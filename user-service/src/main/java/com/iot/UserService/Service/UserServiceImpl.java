@@ -1,4 +1,5 @@
 package com.iot.UserService.Service;
+import cn.hutool.core.util.StrUtil;
 import com.iot.commonModules.DTO.PageDTO;
 import com.iot.commonModules.utils.Jwt.JwtUtils;
 import com.iot.commonModules.utils.PasswordUtil.PasswordUtil;
@@ -31,7 +32,10 @@ public class UserServiceImpl extends com.baomidou.mybatisplus.extension.service.
     @Autowired
     UserMapper userMapper;
     @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+    @Autowired
     private RedisTemplate redisTemplate;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     //注册时检验用户是否存在
@@ -52,6 +56,26 @@ public class UserServiceImpl extends com.baomidou.mybatisplus.extension.service.
     }
     @Override
     public UserLoginVO login(UserLoginDTO loginDTO) {
+        // 前端传的：Redis 的 key（来自获取验证码接口的响应头 Captcha-Key）
+        String captchaKey = loginDTO.getSetKey();
+        // 用户输入的验证码内容
+        String userInputCode = loginDTO.getCaptcha();
+        if (StrUtil.isBlank(captchaKey) || StrUtil.isBlank(userInputCode)) {
+            throw new RuntimeException("验证码不能为空");
+        }
+        //从 Redis 获取正确验证码
+        String correctCode = stringRedisTemplate.opsForValue().get(captchaKey);
+        if (correctCode == null) {
+            throw new RuntimeException("验证码已过期或不存在");
+        }
+
+        if (!userInputCode.equalsIgnoreCase(correctCode)) {
+            throw new RuntimeException("验证码不正确");
+        }
+
+        stringRedisTemplate.delete(captchaKey);
+
+
         // 1. 校验用户是否存在
         User user = userMapper.selectByAccount(loginDTO.getAccount());
         if (user == null) {
