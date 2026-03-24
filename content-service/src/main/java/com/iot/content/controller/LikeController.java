@@ -40,4 +40,10 @@ public class LikeController {
         //查询视频点赞数
        return likeService.likeCount(videoId);
     }
+    // 查询用户点赞的视频ID列表（给用户服务调用）
+    @Operation(summary = "根据用户ID查询该用户点赞过的所有视频ID")
+    @GetMapping("/user/likeList/{userId}")
+    public Result getUserLikeVideoList(@PathVariable Long userId) {
+        return likeService.getUserLikeVideoList(userId);
+    }
 }

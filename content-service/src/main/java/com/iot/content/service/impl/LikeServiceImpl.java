@@ -174,5 +174,10 @@ public class LikeServiceImpl extends ServiceImpl<LikeMapper, Likes> implements I
         return Result.success(countStr);
     }
 
+    @Override
+    public Result getUserLikeVideoList(Long userId) {
+        // 临时空实现，先让项目能启动
+        return Result.success();
+    }
 
 }
