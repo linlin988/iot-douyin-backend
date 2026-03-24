@@ -12,12 +12,15 @@ import com.iot.UserService.Vo.UserLoginVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import javax.management.Query;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,6 +30,8 @@ public class UserServiceImpl extends com.baomidou.mybatisplus.extension.service.
     private final JwtUtils jwtUtil;
     @Autowired
     UserMapper userMapper;
+    @Autowired
+    private RedisTemplate redisTemplate;
     @Override
     @Transactional(rollbackFor = Exception.class)
     //注册时检验用户是否存在
@@ -56,8 +61,15 @@ public class UserServiceImpl extends com.baomidou.mybatisplus.extension.service.
         if (!passwordUtil.match(loginDTO.getPassword(), user.getPassword())) {
             throw new RuntimeException("密码错误");
         }
+        String username = user.getUsername();
+        Long userId = user.getId();
         // 3. 生成JWT Token
-        String token = jwtUtil.getToken(user.getId());
+        String token = JwtUtils.getToken(userId);
+        String redisKey = "login:" + token;
+        redisTemplate.opsForHash().put(redisKey, "userId", String.valueOf(userId));
+        redisTemplate.opsForHash().put(redisKey, "username", username);
+
+        redisTemplate.expire(redisKey, 600, TimeUnit.SECONDS);
         // 4. 构建返回VO
         UserLoginVO loginVO = new UserLoginVO();
         BeanUtils.copyProperties(user, loginVO);
