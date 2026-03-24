@@ -156,15 +156,30 @@ const handleUpload = async () => {
   try {
     // 创建FormData对象
     const formData = new FormData()
-    formData.append('video', videoFile.value)
+    formData.append('file', videoFile.value)
     formData.append('title', videoTitle.value)
     formData.append('description', videoDescription.value)
     
+    // 获取选中的封面并转为 Blob
+    if (coverImages.value.length > 0) {
+      const coverDataUrl = coverImages.value[selectedCover.value]
+      const byteString = atob(coverDataUrl.split(',')[1])
+      const mimeString = coverDataUrl.split(',')[0].split(':')[1].split(';')[0]
+      const ab = new ArrayBuffer(byteString.length)
+      const ia = new Uint8Array(ab)
+      for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i)
+      }
+      const coverBlob = new Blob([ab], { type: mimeString })
+      formData.append('coverfile', coverBlob, 'cover.jpg')
+    } else {
+      alert('请等待封面生成完成！')
+      isUploading.value = false
+      return
+    }
+    
     // 调用API上传视频
-    const response = await api.video.create(formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      },
+    const response = await api.video.upload(formData, {
       onUploadProgress: (progressEvent) => {
         uploadProgress.value = Math.round((progressEvent.loaded / progressEvent.total) * 100)
       }
@@ -259,6 +274,9 @@ const goBack = () => {
 
 .video-preview {
   width: 100%;
+  max-height: 40vh;
+  object-fit: contain;
+  background-color: #1a1a1a;
   border-radius: 10px;
   margin-bottom: 20px;
 }

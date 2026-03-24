@@ -14,4 +14,9 @@ public class UserLoginDTO {
     @NotBlank(message = "用户密码不能为空")
     @Pattern(regexp = "^[a-zA-Z0-9]{6,20}$", message = "密码需为6-20位字母/数字")
     private String password;
+
+    @Schema(description = "用户输入的验证码", required = true)
+    @NotBlank(message = "验证码不能为空！")
+    private String captcha;//用户输入的验证码
+    private String SetKey;//请求头里的验证码
 }

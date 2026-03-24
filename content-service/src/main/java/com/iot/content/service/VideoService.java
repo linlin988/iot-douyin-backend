@@ -18,5 +18,6 @@ public interface VideoService {
 
     //视频详情与播放数统计
     Videos getVideoDetail(Long videoId);
+
     Result getUserWorksByUserId(Long userId);
 }

@@ -4,7 +4,10 @@ package com.iot.content.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.iot.commonModules.DTO.PageDTO;
+import com.iot.commonModules.common.Result;
 import com.iot.commonModules.entity.Videos;
+import com.iot.content.VO.UserVO;
 import com.iot.content.config.AliyunOSSOperator;
 import com.iot.content.mapper.VideoMapper;
 import com.iot.content.service.VideoService;
@@ -28,6 +31,9 @@ public class VideoServiceImpl implements VideoService {
 
     @Autowired
     StringRedisTemplate stringRedisTemplate;
+
+
+
 
     //通过redis获取视频点赞数
     public Long getVideoLikeCount(Long videoId) {
@@ -133,4 +139,11 @@ public class VideoServiceImpl implements VideoService {
         // 2. 再查询视频详情
         return videoMapper.selectById(videoId);
     }
+
+
+    @Override
+    public Result getUserWorksByUserId(Long userId) {
+        return Result.success();
+    }
+
 }

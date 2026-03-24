@@ -8,12 +8,15 @@ import com.iot.UserService.Dto.UserUpdateDTO;
 import com.iot.UserService.Service.UserService;
 import com.iot.UserService.Vo.UserInfoVO;
 import com.iot.UserService.Vo.UserLoginVO;
+import com.iot.commonModules.request.LoginRequest;
+import com.iot.commonModules.service.CaptchaService;
 import com.iot.commonModules.utils.Jwt.JwtUtils;
 import com.iot.commonModules.utils.UserContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +24,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -28,6 +32,8 @@ import com.iot.UserService.Vo.UserLoginVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
+
 @Tag(name = "用户管理接口", description = "包含用户注册、登录、查询用户信息等接口") // 控制器注解
 @RestController
 @RequestMapping
@@ -38,40 +44,14 @@ public class UserController {
     @Autowired
     private RedisTemplate redisTemplate;
 
-    @GetMapping("/token/1")
-    public String getToken1() {
-        String userId = "1234";
-        String username = "testuser";
 
-        String token = JwtUtils.getToken(Long.parseLong(userId));
+    @Autowired
+    private CaptchaService captchaService;
 
-        String redisKey = "login:" + token;
-
-        // 用 hash 存多个字段
-        redisTemplate.opsForHash().put(redisKey, "userId", userId);
-        redisTemplate.opsForHash().put(redisKey, "username", username);
-
-        redisTemplate.expire(redisKey, 600, TimeUnit.SECONDS);
-
-        return token;
-    }
-
-    @GetMapping("/token/2")
-    public String getToken2() {
-        String userId = "6663";
-        String username = "Newtestuser";
-
-        String token = JwtUtils.getToken(Long.parseLong(userId));
-
-        String redisKey = "login:" + token;
-
-        // 用 hash 存多个字段
-        redisTemplate.opsForHash().put(redisKey, "userId", userId);
-        redisTemplate.opsForHash().put(redisKey, "username", username);
-
-        redisTemplate.expire(redisKey, 600, TimeUnit.SECONDS);
-
-        return token;
+    //验证码
+    @GetMapping(value = "/captcha",produces = "image/jpeg")
+    public void getCaptcha(LoginRequest loginRequest, HttpServletResponse response) {
+        captchaService.captcha(loginRequest, response);
     }
 
     // 用户注册接口

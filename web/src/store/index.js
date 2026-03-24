@@ -91,12 +91,50 @@ export const useVideoStore = defineStore('video', {
 
 export const useUserStore = defineStore('user', {
     state: () => ({
+        token: localStorage.getItem('token') || '',
         currentUser: null,
-        userProfile: null
+        userProfile: null,
+        publishedVideos: [],
+        likedVideos: []
     }),
 
+    getters: {
+        isLoggedIn: (state) => !!state.token
+    },
+
     actions: {
-        //  当前登录用户
+        // 登录
+        async login(data) {
+            const res = await api.user.login(data)
+            if (res.data.code === 200) {
+                const token = res.data.data
+                this.token = token
+                localStorage.setItem('token', token)
+                await this.fetchCurrentUser()
+                return { success: true }
+            }
+            return { success: false, message: res.data.message || '登录失败' }
+        },
+
+        // 注册
+        async register(data) {
+            const res = await api.user.register(data)
+            if (res.data.code === 200) {
+                return { success: true }
+            }
+            return { success: false, message: res.data.message || '注册失败' }
+        },
+
+        // 退出登录
+        logout() {
+            this.token = ''
+            this.currentUser = null
+            this.publishedVideos = []
+            this.likedVideos = []
+            localStorage.removeItem('token')
+        },
+
+        // 当前登录用户
         async fetchCurrentUser() {
             try {
                 const res = await api.user.getCurrent()
@@ -108,7 +146,7 @@ export const useUserStore = defineStore('user', {
             }
         },
 
-        //  用户主页
+        // 用户主页
         async fetchUserProfile(userId) {
             try {
                 const userRes = await api.user.getInfo(userId)
@@ -124,7 +162,7 @@ export const useUserStore = defineStore('user', {
                         followers: user.followerCount || 0,
                         following: user.followingCount || 0,
                         isFollowing: false,
-                        videos: [] // 后端暂时没有视频接口
+                        videos: []
                     }
                 }
             } catch (e) {
@@ -132,7 +170,7 @@ export const useUserStore = defineStore('user', {
             }
         },
 
-        //  用户页关注
+        // 用户页关注
         async toggleFollow() {
             if (!this.userProfile) return
 
@@ -144,6 +182,34 @@ export const useUserStore = defineStore('user', {
                 this.userProfile.isFollowing = newState
             } catch (e) {
                 console.error('user toggleFollow error:', e)
+            }
+        },
+
+        // 获取我发布的视频
+        // TODO: 依赖后端接口 GET /content/video/userList/{userId}，若接口未实现则返回空数组
+        async fetchPublishedVideos(userId) {
+            try {
+                const res = await api.video.getUserVideos(userId)
+                if (res.data.code === 200) {
+                    this.publishedVideos = res.data.data?.records || res.data.data || []
+                }
+            } catch (e) {
+                console.error('fetchPublishedVideos error:', e)
+                this.publishedVideos = []
+            }
+        },
+
+        // 获取我点赞的视频
+        // TODO: 依赖后端接口 GET /content/like/likedList/{userId}，若接口未实现则返回空数组
+        async fetchLikedVideos(userId) {
+            try {
+                const res = await api.like.getLikedVideos(userId)
+                if (res.data.code === 200) {
+                    this.likedVideos = res.data.data?.records || res.data.data || []
+                }
+            } catch (e) {
+                console.error('fetchLikedVideos error:', e)
+                this.likedVideos = []
             }
         }
     }

@@ -88,7 +88,6 @@ public class LikeServiceImpl extends ServiceImpl<LikeMapper, Likes> implements I
         ArrayList<String> videoIdSet = (ArrayList<String>) stringRedisTemplate.opsForSet().pop(DIRTY_KEY, 50);
 
         if (CollUtil.isEmpty(videoIdSet)) {
-            log.info("脏数据为空");
             return;
         }
         log.info("脏数据-非-空");
@@ -175,5 +174,10 @@ public class LikeServiceImpl extends ServiceImpl<LikeMapper, Likes> implements I
         return Result.success(countStr);
     }
 
+    @Override
+    public Result getUserLikeVideoList(Long userId) {
+        // 临时空实现，先让项目能启动
+        return Result.success();
+    }
 
 }

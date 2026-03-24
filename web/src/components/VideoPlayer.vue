@@ -34,23 +34,33 @@
           <div class="right-actions">
             <div class="action-item" @click.stop="handleLike(video.id)">
               <div class="action-icon" :class="{ 'liked': video.isLiked }">
-                <Icon name="heart" size="32" />
+                <van-icon name="like" size="32" />
               </div>
               <span class="action-text">{{ formatNumber(video.likes) }}</span>
             </div>
             <div class="action-item" @click.stop="showComments(video.id)">
-              <Icon name="chat-o" size="32" />
+              <div class="action-icon">
+                <van-icon name="chat-o" size="32" />
+              </div>
               <span class="action-text">{{ formatNumber(video.comments) }}</span>
             </div>
             <div class="action-item" @click.stop="handleShare(video.id)">
-              <Icon name="share-o" size="32" />
-              <span class="action-text">{{ formatNumber(video.shares) }}</span>
+              <div class="action-icon">
+                <van-icon name="share-o" size="32" />
+              </div>
+              <span class="action-text">分享</span>
+            </div>
+            <div class="action-item" @click.stop="toggleFullscreen()">
+              <div class="action-icon">
+                <van-icon name="expand-o" size="32" />
+              </div>
+              <span class="action-text">全屏</span>
             </div>
           </div>
           
           <!-- 点赞动画 -->
           <div v-if="showLikeAnimation && currentIndex === index" class="like-animation">
-            <Icon name="heart" size="100" />
+            <van-icon name="like" size="100" />
           </div>
         </div>
       </div>
@@ -61,9 +71,9 @@
       <div class="comments-container">
         <div class="comments-header">
           <h3>评论</h3>
-          <Icon name="cross" @click="showCommentsPopup = false" />
+          <van-icon name="cross" size="20" @click="showCommentsPopup = false" />
         </div>
-        <div class="comments-list">
+        <div class="comments-list" @touchstart.stop @touchmove.stop @touchend.stop @wheel.stop>
           <div v-for="(comment, index) in comments" :key="index" class="comment-item">
             <img :src="comment.avatar" alt="Avatar" class="comment-avatar" />
             <div class="comment-content">
@@ -73,7 +83,7 @@
               </div>
               <p class="comment-text">{{ comment.text }}</p>
               <div class="comment-footer">
-                <Icon name="heart-o" @click="handleCommentLike(index)" />
+                <van-icon name="like-o" @click="handleCommentLike(index)" />
                 <span class="comment-likes">{{ comment.likes }}</span>
               </div>
             </div>
@@ -96,8 +106,9 @@
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
-import { useVideoStore } from '../store'
+import { useVideoStore, useUserStore } from '../store'
 import { formatNumber } from '../utils/format'
+import { showToast } from 'vant'
 import { Icon } from 'vant'
 import { api } from '../api'
 
@@ -112,6 +123,7 @@ const emit = defineEmits(['videoChange'])
 
 const router = useRouter()
 const videoStore = useVideoStore()
+const userStore = useUserStore()
 
 const containerRef = ref(null)
 const videoItems = ref([])
@@ -146,16 +158,19 @@ const comments = ref([
 
 // 处理触摸开始
 const handleTouchStart = (e) => {
+  if (showCommentsPopup.value) return
   touchStartY.value = e.touches[0].clientY
 }
 
 // 处理触摸移动
 const handleTouchMove = (e) => {
+  if (showCommentsPopup.value) return
   touchEndY.value = e.touches[0].clientY
 }
 
 // 处理触摸结束
 const handleTouchEnd = async () => {
+  if (showCommentsPopup.value) return
   const diff = touchStartY.value - touchEndY.value
   if (diff > 50 && currentIndex.value < props.videoList.length - 1) {
     // 向上滑动，下一个视频
@@ -209,15 +224,13 @@ const handleLike = async (videoId) => {
   await videoStore.toggleLike(videoId)
 }
 
-// 处理关注
+// 处理关注：未登录时跳转到登录页
 const handleFollow = async (userId) => {
+  if (!userStore.isLoggedIn) {
+    router.push({ name: 'Login', query: { redirect: '/' } })
+    return
+  }
   await videoStore.toggleFollow(userId)
-}
-
-// 处理分享
-const handleShare = (videoId) => {
-  // 实现分享逻辑
-  console.log('Share video:', videoId)
 }
 
 // 显示评论
@@ -277,9 +290,9 @@ const sendComment = async () => {
         
         if (response.data.code === 200) {
           comments.value.unshift({
-            id: response.data.data.id,
-            author: videoStore.currentUser.name,
-            avatar: videoStore.currentUser.avatar,
+            id: response.data.data?.id || Date.now(),
+            author: userStore.currentUser?.username || '我',
+            avatar: userStore.currentUser?.avatar || '',
             text: commentInput.value,
             time: '刚刚',
             likes: 0
@@ -287,20 +300,13 @@ const sendComment = async () => {
           // 更新视频评论数
           currentVideo.comments++
           commentInput.value = ''
+        } else {
+          showToast('发布评论失败: ' + response.data.message)
         }
       }
     } catch (error) {
       console.error('Failed to send comment:', error)
-      // 降级使用本地添加
-      comments.value.unshift({
-        id: Date.now(),
-        author: videoStore.currentUser.name,
-        avatar: videoStore.currentUser.avatar,
-        text: commentInput.value,
-        time: '刚刚',
-        likes: 0
-      })
-      commentInput.value = ''
+      showToast('发布接口异常')
     }
   }
 }
@@ -308,6 +314,22 @@ const sendComment = async () => {
 // 导航到个人主页
 const navigateToProfile = (userId) => {
   router.push(`/profile/${userId}`)
+}
+
+// 验证初始状态 (已赞已关注)
+const verifyStatus = async () => {
+  const currentVideo = props.videoList[currentIndex.value]
+  if (currentVideo && userStore.isLoggedIn) {
+    try {
+      const likeRes = await api.like.isLike(currentVideo.id)
+      if (likeRes.data.code === 200) currentVideo.isLiked = likeRes.data.data
+      
+      const followRes = await api.follow.isFollow(currentVideo.author.id)
+      if (followRes.data.code === 200) currentVideo.author.isFollowing = followRes.data.data
+    } catch (e) {
+      console.error('状态验证失败', e)
+    }
+  }
 }
 
 // 播放当前视频
@@ -323,6 +345,7 @@ const playCurrentVideo = () => {
   const currentVideo = videoRefs.value[currentIndex.value]
   if (currentVideo) {
     currentVideo.play()
+    verifyStatus()
   }
 }
 
@@ -379,6 +402,7 @@ const handleKeydown = (e) => {
 
 // 处理鼠标滚轮事件
 const handleWheel = (e) => {
+  if (showCommentsPopup.value) return
   e.preventDefault()
   if (e.deltaY > 0) {
     // 向下滚动，下一个视频
@@ -395,6 +419,51 @@ const handleWheel = (e) => {
       videoStore.setCurrentVideoIndex(currentIndex.value)
       emit('videoChange', currentIndex.value)
       playCurrentVideo()
+    }
+  }
+}
+
+// 处理分享
+const handleShare = (videoId) => {
+  const currentUrl = `${window.location.origin}/?video=${videoId}`
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(currentUrl).then(() => {
+      showToast('视频链接已复制到剪贴板')
+    }).catch(() => {
+      showToast('复制失败，请重试')
+    })
+  } else {
+    // 降级方案
+    const input = document.createElement('input')
+    input.value = currentUrl
+    document.body.appendChild(input)
+    input.select()
+    try {
+      document.execCommand('copy')
+      showToast('视频链接已复制到剪贴板')
+    } catch (e) {
+      showToast('复制失败，请重试')
+    }
+    document.body.removeChild(input)
+  }
+}
+
+// 处理全屏
+const toggleFullscreen = () => {
+  const container = containerRef.value
+  if (!container) return
+
+  if (!document.fullscreenElement) {
+    if (container.requestFullscreen) {
+      container.requestFullscreen()
+    } else if (container.webkitRequestFullscreen) {
+      container.webkitRequestFullscreen()
+    }
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen()
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen()
     }
   }
 }
@@ -450,7 +519,8 @@ video {
   left: 0;
   width: 100vw;
   height: 100vh;
-  object-fit: cover;
+  object-fit: contain;
+  background-color: #000;
   z-index: -1;
 }
 
@@ -646,6 +716,8 @@ video {
   border: 1px solid #f0f0f0;
   border-radius: 20px;
   margin-right: 10px;
+  color: #000;
+  background-color: #fff;
 }
 
 .send-comment-btn {
