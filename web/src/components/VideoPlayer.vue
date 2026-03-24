@@ -17,7 +17,7 @@
           <!-- 底部信息 -->
           <div class="bottom-info">
             <div class="author-info">
-              <img :src="video.author.avatar" alt="Avatar" class="avatar" @click.stop="navigateToProfile(video.author.id)" />
+              <img :src="video.author.avatar" alt="Avatar" class="avatar" @click.stop="goToAuthorProfile(video)" />
               <span class="author-name">{{ video.author.name }}</span>
               <button 
                 class="follow-btn" 
@@ -312,8 +312,13 @@ const sendComment = async () => {
 }
 
 // 导航到个人主页
-const navigateToProfile = (userId) => {
-  router.push(`/profile/${userId}`)
+const goToAuthorProfile = (video) => {
+  const userId = video?.author?.id ?? video?.userId
+  if (!userId) return
+  router.push({
+    name: 'Profile',
+    params: { userId: String(userId) }
+  })
 }
 
 // 验证初始状态 (已赞已关注)

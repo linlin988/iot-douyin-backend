@@ -114,6 +114,11 @@ export const api = {
         getInfo: (id) =>
             apiClient.get(`/user/info/${id}`),
 
+        // 根据用户ID查询头像
+        // 接口：GET /user/avatar/{userId}
+        getAvatarById: (userId) =>
+            apiClient.get(`/user/avatar/${userId}`),
+
         update: (data) =>
             apiClient.put('/user/info', data),
 
@@ -121,7 +126,7 @@ export const api = {
         // 接口：POST /user/avatar
         // 参数：file (MultipartFile)
         uploadAvatar: (formData) =>
-            apiClient.post('/user/avatar', formData, {
+            apiClient.post('/content/video/avatar', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             })
     },

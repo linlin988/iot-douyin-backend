@@ -17,14 +17,32 @@ export const useVideoStore = defineStore('video', {
                 const apiData = res.data
 
                 if (apiData.code === 200) {
-                    const videos = apiData.data.records.map((record, index) => ({
+                    const records = apiData.data.records || []
+                    const userIds = [...new Set(records.map(record => record.userId).filter(Boolean))]
+                    const avatarMap = {}
+
+                    await Promise.all(
+                        userIds.map(async (userId) => {
+                            try {
+                                const avatarRes = await api.user.getAvatarById(userId)
+                                const avatarUrl = avatarRes?.data?.data || ''
+                                if (avatarUrl) {
+                                    avatarMap[userId] = avatarUrl
+                                }
+                            } catch (e) {
+                                console.error('fetch avatar error:', e)
+                            }
+                        })
+                    )
+
+                    const videos = records.map((record, index) => ({
                         id: record.id,
                         videoUrl: record.videoUrl?.replace(/`/g, ''),
                         coverUrl: record.coverUrl?.replace(/`/g, ''),
                         author: {
                             id: record.userId,
-                            name: `User${record.userId}`,
-                            avatar: `https://example.com/avatar${record.userId}.jpg`,
+                            name: String(record.userId),
+                            avatar: avatarMap[record.userId] || '',
                             isFollowing: false
                         },
                         description: record.description || record.title || `视频 ${index + 1}`,
@@ -107,7 +125,11 @@ export const useUserStore = defineStore('user', {
         async login(data) {
             const res = await api.user.login(data)
             if (res.data.code === 200) {
-                const token = res.data.data
+                const loginData = res.data.data || {}
+                const token = loginData.token || ''
+                if (!token) {
+                    return { success: false, message: '登录返回缺少token' }
+                }
                 this.token = token
                 localStorage.setItem('token', token)
                 await this.fetchCurrentUser()
@@ -164,9 +186,32 @@ export const useUserStore = defineStore('user', {
                         isFollowing: false,
                         videos: []
                     }
+                } else {
+                    // 查无此用户时也要结束页面加载态
+                    this.userProfile = {
+                        id: Number(userId),
+                        name: String(userId),
+                        avatar: '',
+                        bio: '用户不存在或已注销',
+                        followers: 0,
+                        following: 0,
+                        isFollowing: false,
+                        videos: []
+                    }
                 }
             } catch (e) {
                 console.error('fetchUserProfile error:', e)
+                // 接口异常时同样提供兜底，避免页面一直骨架屏
+                this.userProfile = {
+                    id: Number(userId),
+                    name: String(userId),
+                    avatar: '',
+                    bio: '用户信息加载失败',
+                    followers: 0,
+                    following: 0,
+                    isFollowing: false,
+                    videos: []
+                }
             }
         },
 

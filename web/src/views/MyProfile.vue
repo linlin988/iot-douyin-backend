@@ -110,6 +110,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../store'
+import { api } from '../api'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -152,25 +153,26 @@ const triggerAvatarUpload = () => {
 const handleAvatarChange = async (e) => {
   const file = e.target.files?.[0]
   if (!file) return
-  const reader = new FileReader()
-  reader.onload = (ev) => {
-    avatarSrc.value = ev.target.result
-  }
-  reader.readAsDataURL(file)
   
-  // 上传头像到后端
   try {
     const formData = new FormData()
     formData.append('file', file)
     const res = await api.user.uploadAvatar(formData)
     if (res.data.code === 200) {
-      // 假设接口返回了图像URL，进行更新
-      const newAvatarUrl = res.data.data
-      await api.user.update({ avatar: newAvatarUrl })
+      const newAvatarUrl = res.data?.data
+      if (newAvatarUrl) {
+        avatarSrc.value = newAvatarUrl
+        await api.user.update({ avatar: newAvatarUrl })
+      }
       await userStore.fetchCurrentUser()
+    } else {
+      alert(res.data?.message || '头像上传失败，请重试')
     }
   } catch (error) {
     console.error('头像上传失败:', error)
+    alert('头像上传失败，请重试')
+  } finally {
+    e.target.value = ''
   }
 }
 

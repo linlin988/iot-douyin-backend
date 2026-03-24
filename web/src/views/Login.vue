@@ -287,7 +287,8 @@ onMounted(() => {
   display: block;
   height: 38px;
   width: 100px;
-  object-fit: cover;
+  object-fit: contain;
+  background: #fff;
 }
 
 .error-msg {
