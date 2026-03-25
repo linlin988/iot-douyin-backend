@@ -37,4 +37,6 @@ public interface UserService extends IService<User> {
     List<String> getUserWorks(Long userId);
     //查询用户点赞列表
     List<Long> getUserLikeList(Long userId);
+    // 根据用户ID查询用户名
+    String getUsernameById(Long userId);
 }

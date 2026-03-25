@@ -87,7 +87,7 @@ public class Result {
      * 操作失败，默认500错误，无提示信息
      * 使用示例：return Result.error();
      */
-    public static Result error(){
+    public static Result error(String 头像上传失败){
         return new Result(500,null,null,null);
     }
 

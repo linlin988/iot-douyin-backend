@@ -1,6 +1,7 @@
 package com.iot.UserService.Service;
 import cn.hutool.core.util.StrUtil;
 import com.iot.commonModules.DTO.PageDTO;
+import com.iot.commonModules.common.AllException;
 import com.iot.commonModules.utils.Jwt.JwtUtils;
 import com.iot.commonModules.utils.PasswordUtil.PasswordUtil;
 import com.iot.UserService.Dto.UserLoginDTO;
@@ -191,6 +192,14 @@ public class UserServiceImpl extends com.baomidou.mybatisplus.extension.service.
         return (List<Long>) result.getData();
     }
 
+    @Override
+    public String getUsernameById(Long userId) {
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new AllException("用户不存在", 400);
+        }
+        return user.getUsername();
+    }
 }
 
 

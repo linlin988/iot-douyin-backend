@@ -2,6 +2,7 @@ package com.iot.content.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.iot.commonModules.common.Result;
+import com.iot.commonModules.entity.User;
 import com.iot.commonModules.entity.Videos;
 import com.iot.commonModules.utils.UserContext;
 import com.iot.content.service.VideoService;
@@ -76,6 +77,26 @@ public class VideoController {
     @GetMapping("/user/works/{userId}")
     public Result getUserWorksByUserId(@PathVariable Long userId) {
         return videoService.getUserWorksByUserId(userId);
+    }
+
+    //上传头像
+    @Operation(summary = "根据用户ID上传头像")
+    @PostMapping("/avatar")
+    public Result uploadAvatar(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "userId", required = false) Long userId  // 改成非必传
+    ) throws Exception {
+
+        // 从token/上下文获取当前登录用户ID，而不是前端传
+        if (userId == null) {
+            userId = UserContext.getUser(); // 这里你后面换成从 SecurityContext 拿
+        }
+
+        User user = videoService.uploadAvatar(file, userId);
+        if (user != null) {
+            return Result.success("头像上传成功", user.getAvatar());
+        }
+        return Result.error("头像上传失败");
     }
 }
 

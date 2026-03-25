@@ -1,5 +1,7 @@
 package com.iot.UserService.Entity;
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -8,6 +10,7 @@ import java.time.LocalDateTime;
 public class User implements Serializable{
     private static final long serialVersionUID = 1L;//Serializable的适用场景就是当自己写的java类要进行网络传输的时候 例如微服务之间的调用 后面的值也可以修改为2l等等
     @TableId(type=IdType.ASSIGN_ID)
+    @JsonSerialize(using = ToStringSerializer.class) // 解决精度丢失
     private Long id;//用户id,必须用包装类才能雪花算法自动填充id
     private String username;//用户名
     private String phone;//用户手机号码
