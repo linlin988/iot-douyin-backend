@@ -2,12 +2,14 @@ package com.iot.content.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.BooleanUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.iot.commonModules.DTO.LikeMessageDTO;
 import com.iot.commonModules.common.Result;
 import com.iot.commonModules.entity.Likes;
 import com.iot.commonModules.entity.Videos;
 import com.iot.commonModules.utils.UserContext;
+import com.iot.content.VO.VideoVO;
 import com.iot.content.mapper.LikeMapper;
 import com.iot.content.mapper.VideoMapper;
 import com.iot.content.service.ILikeService;
@@ -20,6 +22,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -37,6 +41,7 @@ public class LikeServiceImpl extends ServiceImpl<LikeMapper, Likes> implements I
     private static final String LIKE_USER_KEY = "like:";           // 点赞用户集合
     private static final String LIKE_COUNT_KEY = "like:count:";   // 点赞计数
     private static final String DIRTY_KEY = "like:dirty:video";   // 脏视频集合
+    private static final String USER_LIKE_KEY = "user:like:";     // 用户点赞视频集合
 
     //点赞/取消点赞（只写Redis）
     @Override
@@ -58,6 +63,7 @@ public class LikeServiceImpl extends ServiceImpl<LikeMapper, Likes> implements I
                 stringRedisTemplate.opsForValue().increment(LIKE_COUNT_KEY + videoId);
                 // 标记脏数据
                 stringRedisTemplate.opsForSet().add(DIRTY_KEY, videoId.toString());
+                stringRedisTemplate.opsForSet().add(USER_LIKE_KEY + userId, videoId.toString());
             }
             //3. 发送 MQ 消息
             LikeMessageDTO dto = new LikeMessageDTO();
@@ -75,6 +81,7 @@ public class LikeServiceImpl extends ServiceImpl<LikeMapper, Likes> implements I
                 stringRedisTemplate.opsForValue().decrement(LIKE_COUNT_KEY + videoId);
                 // 标记脏数据
                 stringRedisTemplate.opsForSet().add(DIRTY_KEY, videoId.toString());
+                stringRedisTemplate.opsForSet().remove(USER_LIKE_KEY + userId, videoId.toString());
             }
         }
 
@@ -175,9 +182,26 @@ public class LikeServiceImpl extends ServiceImpl<LikeMapper, Likes> implements I
     }
 
     @Override
-    public Result getUserLikeVideoList(Long userId) {
+    public List<VideoVO> getUserLikeVideoList(Long userId) {
         // 临时空实现，先让项目能启动
-        return Result.success();
+        String key = USER_LIKE_KEY + userId;
+        Set<String> videoIdSet = stringRedisTemplate.opsForSet().members(key);
+
+        if (videoIdSet == null) return null;
+
+        List<Long> videoIdList = videoIdSet.stream()
+                    .map(Long::valueOf)
+                    .collect(Collectors.toList());
+
+        List<Videos> videoList = videoMapper.selectList(new QueryWrapper<Videos>()
+                .in("id", videoIdList).orderByDesc("create_time"));
+
+        List<VideoVO> videoVOList = videoList.stream()
+                .map(v -> new VideoVO(v.getId(), v.getVideoUrl()))
+                .collect(Collectors.toList());
+
+
+        return videoVOList;
     }
 
 }

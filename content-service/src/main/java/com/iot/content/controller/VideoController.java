@@ -5,6 +5,7 @@ import com.iot.commonModules.common.Result;
 import com.iot.commonModules.entity.User;
 import com.iot.commonModules.entity.Videos;
 import com.iot.commonModules.utils.UserContext;
+import com.iot.content.VO.VideoVO;
 import com.iot.content.service.VideoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -76,12 +77,13 @@ public class VideoController {
         return Result.success(video);
     }
 
-
-    // 查询当前用户发布的视频列表（给用户服务调用）
-    @Operation(summary = "根据用户ID查询该用户发布的所有视频ID")
-    @GetMapping("/user/works/{userId}")
-    public Result getUserWorksByUserId(@PathVariable Long userId) {
-        return videoService.getUserWorksByUserId(userId);
+   // 查询当前用户发布的视频列表（给用户服务调用）
+    @Operation(summary = "根据用户ID查询该用户发布的所有视频")
+    @GetMapping("/myVideos")
+    public Result getUserWorksByUserId() {
+        Long userId = UserContext.getUser();
+        List<VideoVO> videoList = videoService.getUserWorksByUserId(userId);
+        return Result.success(videoList);
     }
 
     //上传头像
