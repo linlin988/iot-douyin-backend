@@ -22,4 +22,9 @@ public interface VideoMapper extends BaseMapper<Videos> {
     @Update("UPDATE t_video SET play_count = play_count + 1 WHERE id = #{videoId}")
     void incrementPlayCount(Long videoId);
 
+    /**
+     * 批量增加播放量
+     */
+    @Update("UPDATE video SET play_count = play_count + #{count} WHERE id = #{videoId}")
+    void addPlayCount(@Param("videoId") Long videoId, @Param("count") Long count);
 }

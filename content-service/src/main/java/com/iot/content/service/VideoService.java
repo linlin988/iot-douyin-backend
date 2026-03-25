@@ -27,4 +27,6 @@ public interface VideoService {
 
     // 头像上传
     User uploadAvatar(MultipartFile file, Long userId) throws Exception;
+
+    void recordPlayRedis(Long videoId, Long userId);
 }

@@ -100,7 +100,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comments> imp
             User user = userMap.get(comment.getUserId());
             return new CommentVO(
                     user != null ? user.getAvatar() : "",
-                    user != null ? user.getNickname() : "未知用户",
+                    user != null ? user.getUsername() : "未知用户",
                     comment.getContent(),
                     LocalDateTimeUtil.format(comment.getCreateTime(), "yyyy-MM-dd HH:mm")
             );

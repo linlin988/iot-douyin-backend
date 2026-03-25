@@ -2,6 +2,8 @@ package com.iot.content.controller;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSON;
+import cn.hutool.json.JSONUtil;
 import com.iot.commonModules.common.Result;
 import com.iot.commonModules.DTO.pageQuery;
 import com.iot.commonModules.entity.Comments;
@@ -57,7 +59,10 @@ public class CommentController {
     @Operation(description = "获取当前评论列表")
     public Result listComment(
             @PathVariable("id") Long videoId, @RequestBody pageQuery pageQuery){
-        return commentService.listComment(videoId, pageQuery);
+        log.info("分页查询评论列表");
+        Result result = commentService.listComment(videoId, pageQuery);
+        log.info("分页查询评论列表结果：\n{}", JSONUtil.toJsonPrettyStr(result));
+        return result;
     }
 
 
