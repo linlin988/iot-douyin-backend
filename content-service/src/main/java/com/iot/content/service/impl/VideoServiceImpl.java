@@ -6,10 +6,12 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.iot.commonModules.DTO.PageDTO;
 import com.iot.commonModules.common.Result;
+import com.iot.commonModules.entity.User;
 import com.iot.commonModules.entity.Videos;
 import com.iot.content.VO.UserVO;
 import com.iot.content.VO.VideoVO;
 import com.iot.content.config.AliyunOSSOperator;
+import com.iot.content.mapper.UserMapper;
 import com.iot.content.mapper.VideoMapper;
 import com.iot.content.service.VideoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.UUID;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,6 +34,8 @@ public class VideoServiceImpl implements VideoService {
     @Autowired
     VideoMapper videoMapper;
 
+    @Autowired
+    UserMapper userMapper;
 
     @Autowired
     StringRedisTemplate stringRedisTemplate;
@@ -153,6 +159,30 @@ public class VideoServiceImpl implements VideoService {
          return videoList.stream().map(v->
                  new VideoVO(v.getId(),v.getVideoUrl()))
                  .collect(Collectors.toList());
+    }
+
+    @Override
+    public User uploadAvatar(MultipartFile file, Long userId) throws Exception {
+
+        // 1. 上传头像文件到阿里云OSS（和你封面图逻辑完全一样）
+        String avatarUrl = aliyunOSSOperator.upload(file.getBytes(), file.getOriginalFilename());
+
+        // 2. 构建用户实体（只更新头像）
+        User user = new User();
+        user.setId(userId);       // 用户ID
+        user.setAvatar(avatarUrl); // 头像URL
+
+        // 3. 更新数据库（同你视频insert风格，用update）
+
+        int result = userMapper.updateById(user);
+
+        // 4. 更新成功后，返回完整的用户信息（同你视频返回逻辑）
+        if (result > 0) {
+            return userMapper.selectById(userId);
+        }
+
+        // 5. 失败返回null
+        return null;
     }
 
 }

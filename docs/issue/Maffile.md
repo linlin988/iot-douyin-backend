@@ -272,3 +272,33 @@ rabbitmq:  0.4  320m
 因此在服务器启动后第一次请求会非常缓慢，后面就会好很多  
 综上所述，服务器启动后最好跑一遍所有接口
 
+
+## 问题12：前后端联调过程中的一系列问题
+### 问题简述：雪花id精度丢失
+用户id采用19位雪花算法生成，在通过json返回给前端时，前端接受的id后三位全部变成0  
+导致前端一直无法正确获取用户信息
+### 解决方案：
+思路：后端传json时，将id转为String传给前端，接收时使用String接受，再转为Long  
+- 在公共模块配置全局转换
+- 将id转为String传给前端
+```java
+@Configuration
+public class JacksonConfig {
+@Bean
+public Jackson2ObjectMapperBuilderCustomizer jackson2ObjectMapperBuilderCustomizer() {
+return builder -> builder
+.serializerByType(Long.class, ToStringSerializer.instance)
+.serializerByType(Long.TYPE, ToStringSerializer.instance);
+}
+}
+```
+- 使用String接受，再转为Long
+```java
+@Configuration
+public class WebConfig implements WebMvcConfigurer {
+    @Override
+    public void addFormatters(FormatterRegistry registry) {
+        registry.addConverter(String.class, Long.class, Long::valueOf);
+    }
+}
+```

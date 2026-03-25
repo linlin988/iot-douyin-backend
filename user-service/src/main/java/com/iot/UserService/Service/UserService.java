@@ -33,5 +33,7 @@ public interface UserService extends IService<User> {
     void updateUserInfo(Long userId, UserUpdateDTO updateDTO);
     //查询用户头像地址
     String getUserAvatar(Long userId);
-    //查询用户作品
+
+    // 根据用户ID查询用户名
+    String getUsernameById(Long userId);
 }
