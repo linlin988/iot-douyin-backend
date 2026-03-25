@@ -34,19 +34,21 @@
         class="video-preview"
       ></video>
       
-      <!-- 封面选择 -->
+      <!-- 封面上传 -->
       <div class="cover-selector">
-        <h3>选择封面</h3>
-        <div class="cover-list">
-          <div 
-            v-for="(cover, index) in coverImages" 
-            :key="index" 
-            class="cover-item" 
-            :class="{ 'active': selectedCover === index }"
-            @click="selectedCover = index"
-          >
-            <img :src="cover" alt="Cover" />
-          </div>
+        <h3>上传封面</h3>
+        <input
+          type="file"
+          ref="coverInput"
+          accept="image/*"
+          @change="handleCoverSelect"
+          style="display: none"
+        />
+        <button class="select-btn cover-btn" @click="coverInput.click()">
+          选择封面
+        </button>
+        <div class="cover-preview" v-if="coverUrl">
+          <img :src="coverUrl" alt="封面预览" />
         </div>
       </div>
       
@@ -82,7 +84,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { api } from '../api'
 
@@ -90,13 +92,14 @@ const router = useRouter()
 
 // 文件输入
 const fileInput = ref(null)
+const coverInput = ref(null)
 const videoRef = ref(null)
 
 // 视频相关
 const videoFile = ref(null)
 const videoUrl = ref('')
-const coverImages = ref([])
-const selectedCover = ref(0)
+const coverFile = ref(null)
+const coverUrl = ref('')
 
 // 视频信息
 const videoTitle = ref('')
@@ -108,7 +111,7 @@ const uploadProgress = ref(0)
 
 // 计算属性：是否准备就绪
 const isReady = computed(() => {
-  return videoFile.value && videoTitle.value.trim()
+  return videoFile.value && coverFile.value && videoTitle.value.trim()
 })
 
 // 处理文件选择
@@ -117,32 +120,15 @@ const handleFileSelect = (e) => {
   if (file) {
     videoFile.value = file
     videoUrl.value = URL.createObjectURL(file)
-    // 生成封面
-    generateCovers()
   }
 }
 
-// 生成封面
-const generateCovers = () => {
-  const video = videoRef.value
-  if (video) {
-    video.addEventListener('loadedmetadata', () => {
-      // 生成3个封面
-      for (let i = 0; i < 3; i++) {
-        const canvas = document.createElement('canvas')
-        const ctx = canvas.getContext('2d')
-        canvas.width = 320
-        canvas.height = 480
-        
-        // 设置视频时间点
-        video.currentTime = video.duration * (i + 1) / 4
-        
-        setTimeout(() => {
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-          coverImages.value.push(canvas.toDataURL('image/jpeg'))
-        }, 100)
-      }
-    })
+// 处理封面选择
+const handleCoverSelect = (e) => {
+  const file = e.target.files[0]
+  if (file) {
+    coverFile.value = file
+    coverUrl.value = URL.createObjectURL(file)
   }
 }
 
@@ -157,26 +143,9 @@ const handleUpload = async () => {
     // 创建FormData对象
     const formData = new FormData()
     formData.append('file', videoFile.value)
+    formData.append('coverfile', coverFile.value)
     formData.append('title', videoTitle.value)
     formData.append('description', videoDescription.value)
-    
-    // 获取选中的封面并转为 Blob
-    if (coverImages.value.length > 0) {
-      const coverDataUrl = coverImages.value[selectedCover.value]
-      const byteString = atob(coverDataUrl.split(',')[1])
-      const mimeString = coverDataUrl.split(',')[0].split(':')[1].split(';')[0]
-      const ab = new ArrayBuffer(byteString.length)
-      const ia = new Uint8Array(ab)
-      for (let i = 0; i < byteString.length; i++) {
-        ia[i] = byteString.charCodeAt(i)
-      }
-      const coverBlob = new Blob([ab], { type: mimeString })
-      formData.append('coverfile', coverBlob, 'cover.jpg')
-    } else {
-      alert('请等待封面生成完成！')
-      isUploading.value = false
-      return
-    }
     
     // 调用API上传视频
     const response = await api.video.upload(formData, {
@@ -211,10 +180,13 @@ const goBack = () => {
 <style scoped>
 .upload-container {
   width: 100vw;
-  min-height: 100vh;
+  height: 100vh;
   background-color: #000;
   color: #fff;
   padding-bottom: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .upload-header {
@@ -290,26 +262,19 @@ const goBack = () => {
   font-size: 16px;
 }
 
-.cover-list {
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  padding-bottom: 10px;
+.cover-btn {
+  margin-bottom: 12px;
 }
 
-.cover-item {
-  flex: 0 0 100px;
-  height: 150px;
+.cover-preview {
+  width: 120px;
+  height: 180px;
   border-radius: 8px;
   overflow: hidden;
-  border: 2px solid transparent;
+  border: 1px solid #444;
 }
 
-.cover-item.active {
-  border-color: #ff0050;
-}
-
-.cover-item img {
+.cover-preview img {
   width: 100%;
   height: 100%;
   object-fit: cover;

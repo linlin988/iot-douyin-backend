@@ -40,4 +40,23 @@ public interface UserMapper extends BaseMapper<User> {
      */
     @Select("select fan_count from t_user where id = #{userId}")
     Integer queryFansCount(Long userId);
+
+    @Update({
+            "<script>",
+            "update t_user ",
+            "<set>",
+            "   <if test='avatar != null'>avatar = #{avatar},</if>",
+            "   <if test='username != null'>username = #{username},</if>",
+            "   <if test='password != null'>password = #{password},</if>",
+            "</set>",
+            "where id = #{id}",
+            "</script>"
+    })
+    int updateById(User user);
+
+    /**
+     * 根据ID查询用户
+     */
+    @Select("select * from t_user where id = #{userId}")
+    User selectById(@Param("userId") Long userId);
 }

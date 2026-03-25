@@ -159,4 +159,16 @@ public class UserController {
         List<Long> likeList = userService.getUserLikeList(userId);
         return Result.success("查询点赞列表成功", likeList);
     }
+
+    //根据用户ID查询用户名
+    @Operation(summary = "根据用户ID查询用户名", description = "传入用户ID，返回对应用户名")
+    @GetMapping("/username/{userId}")
+    public Result getUsernameById(@PathVariable Long userId) {
+        if (userId == null || userId <= 0) {
+            throw new AllException("用户ID格式错误", 400);
+        }
+        String username = userService.getUsernameById(userId);
+        return Result.success("查询用户名成功", username);
+    }
+
 }
