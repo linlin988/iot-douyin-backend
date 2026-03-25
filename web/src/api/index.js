@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const apiClient = axios.create({
-    baseURL: 'http://localhost:9999', //  网关地址
+    baseURL: 'http://121.41.228.22:9999', //  网关地址
     headers: {
         'Content-Type': 'application/json'
     }
@@ -25,6 +25,10 @@ export const api = {
         getDetail: (id) => apiClient.get(`/content/video/detail/${id}`),
 
         delete: (id) => apiClient.delete(`/content/video/delete/${id}`),
+
+        // 播放量统计
+        // 接口：GET /content/video/play/{videoId}
+        play: (videoId) => apiClient.get(`/content/video/play/${videoId}`),
 
         // 获取指定用户发布的视频列表
         // 接口：GET /content/video/userList/{userId}

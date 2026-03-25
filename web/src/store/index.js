@@ -56,9 +56,10 @@ export const useVideoStore = defineStore('video', {
                             avatar: avatarMap[record.userId] || '',
                             isFollowing: false
                         },
-                        description: record.description || record.title || `视频 ${index + 1}`,
-                        likes: record.likeCount,
-                        comments: record.commentCount,
+                        title: record.title || `视频 ${index + 1}`,
+                        description: record.description || '',
+                        likes: Number(record.likeCount) || 0,
+                        comments: Number(record.commentCount) || 0,
                         shares: 0,
                         isLiked: false
                     }))
@@ -89,7 +90,8 @@ export const useVideoStore = defineStore('video', {
                 await api.like.toggle(videoId)
 
                 video.isLiked = !video.isLiked
-                video.likes += video.isLiked ? 1 : -1
+                // 确保 likes 是数字类型
+                video.likes = Number(video.likes) + (video.isLiked ? 1 : -1)
             } catch (e) {
                 console.error('toggleLike error:', e)
             }
