@@ -119,6 +119,11 @@ export const api = {
         getAvatarById: (userId) =>
             apiClient.get(`/user/avatar/${userId}`),
 
+        // 根据用户ID查询用户名
+        // 接口：GET /user/username/{userId}
+        getUsernameById: (userId) =>
+            apiClient.get(`/user/username/${userId}`),
+
         update: (data) =>
             apiClient.put('/user/info', data),
 

@@ -88,6 +88,7 @@
               </div>
             </div>
           </div>
+          <div v-if="comments.length === 0" class="comments-empty">这里空空的~</div>
         </div>
         <div class="comment-input-container">
           <input 
@@ -136,25 +137,7 @@ const showCommentsPopup = ref(false)
 const commentInput = ref('')
 const page = ref(1)
 
-// 模拟评论数据
-const comments = ref([
-  {
-    id: 1,
-    author: 'User1',
-    avatar: 'https://example.com/avatar1.jpg',
-    text: 'Great video!',
-    time: '2 hours ago',
-    likes: 123
-  },
-  {
-    id: 2,
-    author: 'User2',
-    avatar: 'https://example.com/avatar2.jpg',
-    text: 'This is amazing!',
-    time: '3 hours ago',
-    likes: 456
-  }
-])
+const comments = ref([])
 
 // 处理触摸开始
 const handleTouchStart = (e) => {
@@ -236,20 +219,23 @@ const handleFollow = async (userId) => {
 // 显示评论
 const showComments = async (videoId) => {
   try {
-    const response = await api.comment.getList(videoId)
+    const response = await api.comment.getList(videoId, { page: 1, size: 20 })
     if (response.data.code === 200) {
-      comments.value = response.data.data.records.map(comment => ({
-        id: comment.id,
-        author: comment.username,
-        avatar: comment.avatar || `https://example.com/avatar${comment.userId}.jpg`,
-        text: comment.content,
-        time: formatCommentTime(comment.createTime),
-        likes: comment.likeCount
+      const records = response.data?.data?.list || []
+      comments.value = records.map((comment, idx) => ({
+        id: idx,
+        author: comment.nickname || '未知用户',
+        avatar: comment.avatar?.trim() || '',
+        text: comment.content || '',
+        time: formatCommentTime(comment.createTime || ''),
+        likes: 0
       }))
+    } else {
+      comments.value = []
     }
   } catch (error) {
     console.error('Failed to fetch comments:', error)
-    // 保持默认评论数据
+    comments.value = []
   }
   showCommentsPopup.value = true
 }
@@ -688,6 +674,7 @@ video {
 .comment-author {
   font-weight: bold;
   font-size: 14px;
+  color: #333;
 }
 
 .comment-time {
@@ -699,6 +686,7 @@ video {
   font-size: 14px;
   line-height: 1.5;
   margin-bottom: 5px;
+  color: #000;
 }
 
 .comment-footer {
@@ -732,5 +720,11 @@ video {
   border-radius: 20px;
   padding: 0 20px;
   cursor: pointer;
+}
+
+.comments-empty {
+  text-align: center;
+  color: #999;
+  padding: 24px 0;
 }
 </style>

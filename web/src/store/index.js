@@ -20,6 +20,7 @@ export const useVideoStore = defineStore('video', {
                     const records = apiData.data.records || []
                     const userIds = [...new Set(records.map(record => record.userId).filter(Boolean))]
                     const avatarMap = {}
+                    const usernameMap = {}
 
                     await Promise.all(
                         userIds.map(async (userId) => {
@@ -32,6 +33,16 @@ export const useVideoStore = defineStore('video', {
                             } catch (e) {
                                 console.error('fetch avatar error:', e)
                             }
+
+                            try {
+                                const usernameRes = await api.user.getUsernameById(userId)
+                                const username = usernameRes?.data?.data || ''
+                                if (username) {
+                                    usernameMap[userId] = username
+                                }
+                            } catch (e) {
+                                console.error('fetch username error:', e)
+                            }
                         })
                     )
 
@@ -41,7 +52,7 @@ export const useVideoStore = defineStore('video', {
                         coverUrl: record.coverUrl?.replace(/`/g, ''),
                         author: {
                             id: record.userId,
-                            name: String(record.userId),
+                            name: usernameMap[record.userId] || String(record.userId),
                             avatar: avatarMap[record.userId] || '',
                             isFollowing: false
                         },
