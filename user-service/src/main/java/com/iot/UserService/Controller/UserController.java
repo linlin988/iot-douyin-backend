@@ -117,10 +117,8 @@ public class UserController {
     )
     @PutMapping("/info")
     public Result updateCurrentUserInfo(
-            HttpServletRequest request,
-            @Valid @RequestBody UserUpdateDTO updateDTO
-    ) {
-        Long userId = Long.valueOf(request.getHeader("iot-User-Id"));
+            @Valid @RequestBody UserUpdateDTO updateDTO) {
+        Long userId = UserContext.getUser();
         if (userId == null) {
             throw new AllException("未获取到登录用户信息", 401);
         }
@@ -129,8 +127,9 @@ public class UserController {
     }
     // 查询用户头像
     @Operation(summary = "查询用户头像", description = "根据用户ID查询用户头像地址")
-    @GetMapping("/avatar/{userId}")
-    public Result getUserAvatar(@PathVariable Long userId) {
+    @GetMapping("/avatar")
+    public Result getUserAvatar() {
+        Long userId = UserContext.getUser();
         if (userId == null || userId <= 0) {
             throw new AllException("用户ID格式错误", 400);
         }
@@ -138,25 +137,5 @@ public class UserController {
         return Result.success("查询头像成功", avatar);
     }
 
-    // 查询用户作品
-    @Operation(summary = "查询用户作品", description = "查询当前用户发布的作品列表")
-    @GetMapping("/works/{userId}")
-    public Result getUserWorks(@PathVariable Long userId) {
-        if (userId == null || userId <= 0) {
-            throw new AllException("用户ID格式错误", 400);
-        }
-        List<String> works = userService.getUserWorks(userId);
-        return Result.success("查询用户作品成功", works);
-    }
 
-    // 查询用户点赞列表
-    @Operation(summary = "查看用户点赞列表", description = "查询当前用户点赞过的视频ID列表")
-    @GetMapping("/like/list/{userId}")
-    public Result getUserLikeList(@PathVariable Long userId) {
-        if (userId == null || userId <= 0) {
-            throw new AllException("用户ID格式错误", 400);
-        }
-        List<Long> likeList = userService.getUserLikeList(userId);
-        return Result.success("查询点赞列表成功", likeList);
-    }
 }

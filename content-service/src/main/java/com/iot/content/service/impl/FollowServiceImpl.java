@@ -100,7 +100,7 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper,Follows> impleme
         Long followUserId = UserContext.getUser();
         Page<Follows> page = pageQuery.toMpPageDefaultSortByCreateTimeDesc();
         Page<Follows> followsPage = query()
-                .eq("follow_user_id", followUserId)
+                .eq("follow_user_id", followUserId).orderByDesc("create_time")
                 .page(page);
 
         if (followsPage.getRecords().isEmpty()) {
@@ -149,7 +149,7 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper,Follows> impleme
 
         // 3.执行分页查询，查询我的粉丝（即关注我的用户）
         Page<Follows> followsPage = query()
-                .eq("followed_user_id", followUserId)
+                .eq("followed_user_id", followUserId).orderByDesc("create_time")
                 .page(page);
 
         // 4.从关注记录中提取粉丝ID

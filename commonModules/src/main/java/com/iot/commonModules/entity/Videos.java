@@ -1,7 +1,9 @@
 package com.iot.commonModules.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -12,6 +14,8 @@ import java.time.LocalDateTime;
  */
 @Data
 @TableName(value = "t_video")
+@AllArgsConstructor
+@NoArgsConstructor
 public class Videos implements Serializable {
     /**
      * 视频ID，雪花算法

@@ -8,6 +8,7 @@ import com.iot.commonModules.DTO.PageDTO;
 import com.iot.commonModules.common.Result;
 import com.iot.commonModules.entity.Videos;
 import com.iot.content.VO.UserVO;
+import com.iot.content.VO.VideoVO;
 import com.iot.content.config.AliyunOSSOperator;
 import com.iot.content.mapper.VideoMapper;
 import com.iot.content.service.VideoService;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -142,12 +144,15 @@ public class VideoServiceImpl implements VideoService {
 
 
     @Override
-    public Result getUserWorksByUserId(Long userId) {
+    public List<VideoVO> getUserWorksByUserId(Long userId) {
         QueryWrapper<Videos> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", userId);
         queryWrapper.orderByDesc("create_time"); //按创建时间倒序
         List<Videos> videoList = videoMapper.selectList(queryWrapper);
-        return Result.success(videoList);
+
+         return videoList.stream().map(v->
+                 new VideoVO(v.getId(),v.getVideoUrl()))
+                 .collect(Collectors.toList());
     }
 
 }
