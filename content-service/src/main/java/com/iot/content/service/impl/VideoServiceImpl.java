@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.UUID;
+import java.util.List;
 
 
 @Service
@@ -148,7 +149,11 @@ public class VideoServiceImpl implements VideoService {
 
     @Override
     public Result getUserWorksByUserId(Long userId) {
-        return Result.success();
+        QueryWrapper<Videos> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", userId);
+        queryWrapper.orderByDesc("create_time"); //按创建时间倒序
+        List<Videos> videoList = videoMapper.selectList(queryWrapper);
+        return Result.success(videoList);
     }
 
     @Override
