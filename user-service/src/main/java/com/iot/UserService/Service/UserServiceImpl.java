@@ -107,7 +107,7 @@ public class UserServiceImpl extends com.baomidou.mybatisplus.extension.service.
         String finalNickname = StringUtils.hasText(updateDTO.getNickname()) ? updateDTO.getNickname() : user.getUsername(); // 你实体类用的是username，数据库是nickname？需确认字段映射
         if (!finalAvatar.equals(user.getAvatar()) || !finalNickname.equals(user.getUsername())) {
             userMapper.updateUserInfo(userId, finalAvatar, finalNickname);
-            // 同步更新update_time（你原有代码有update_time字段）
+            // 同步更新update_time
             user.setUpdateTime(LocalDateTime.now());
             userMapper.updateById(user); // 仅更新时间，不影响其他字段
         }
