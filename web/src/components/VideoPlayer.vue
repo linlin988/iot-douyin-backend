@@ -129,6 +129,10 @@ const props = defineProps({
   videoList: {
     type: Array,
     default: () => []
+  },
+  currentIndex: {
+    type: Number,
+    default: 0
   }
 })
 
@@ -141,7 +145,7 @@ const userStore = useUserStore()
 const containerRef = ref(null)
 const videoItems = ref([])
 const videoRefs = ref({})
-const currentIndex = ref(0)
+const currentIndex = ref(props.currentIndex)
 const touchStartY = ref(0)
 const touchEndY = ref(0)
 const showLikeAnimation = ref(false)
@@ -186,6 +190,11 @@ const handleTouchEnd = async () => {
     videoStore.setCurrentVideoIndex(currentIndex.value)
     emit('videoChange', currentIndex.value)
     playCurrentVideo()
+  }
+  // 检查是否滑到了最后一个视频
+  if (currentIndex.value === props.videoList.length - 1 && !videoStore.isLoading && videoStore.hasMore) {
+    page.value++
+    await videoStore.fetchVideoList(page.value, true)
   }
 }
 
@@ -414,6 +423,16 @@ watch(() => props.videoList, () => {
     playCurrentVideo()
   })
 }, { deep: true })
+
+// 监听currentIndex变化
+watch(() => props.currentIndex, (newIndex) => {
+  if (newIndex !== currentIndex.value) {
+    currentIndex.value = newIndex
+    videoStore.setCurrentVideoIndex(newIndex)
+    emit('videoChange', newIndex)
+    playCurrentVideo()
+  }
+})
 
 // 处理键盘事件
 const handleKeydown = (e) => {

@@ -95,27 +95,40 @@
     <div class="video-grid" v-if="userProfile">
       <template v-if="activeTab === 'works'">
         <div
-          v-for="(video, index) in userProfile.videos"
+          v-for="(video, index) in publishedVideos"
           :key="video.id"
           class="video-grid-item"
+          @click="playVideo(video, 'works')"
         >
           <img :src="video.coverUrl" alt="Video cover" class="video-cover"
             @error="(e) => e.target.style.opacity='0'" />
           <div class="video-overlay">
             <span class="play-icon">▶</span>
-            <span class="video-stats">♥ {{ formatNumber(video.likes) }}</span>
+            <span class="video-stats">♥ {{ formatNumber(video.likeCount || 0) }}</span>
           </div>
         </div>
-        <div v-if="!userProfile.videos.length" class="empty-state">
+        <div v-if="!publishedVideos.length" class="empty-state">
           <p class="empty-icon">🎬</p>
           <p class="empty-text">还没有发布作品</p>
         </div>
       </template>
       <template v-else>
-        <!-- 喜欢列表（TODO：后端接口 GET /content/like/likedList/{userId}）-->
-        <div class="empty-state">
-          <p class="empty-icon">🔒</p>
-          <p class="empty-text">该用户的喜欢列表已加密</p>
+        <div
+          v-for="(video, index) in likedVideos"
+          :key="video.id"
+          class="video-grid-item"
+          @click="playVideo(video, 'likes')"
+        >
+          <img :src="video.coverUrl" alt="Video cover" class="video-cover"
+            @error="(e) => e.target.style.opacity='0'" />
+          <div class="video-overlay">
+            <span class="play-icon">▶</span>
+            <span class="video-stats">♥ {{ formatNumber(video.likeCount || 0) }}</span>
+          </div>
+        </div>
+        <div v-if="!likedVideos.length" class="empty-state">
+          <p class="empty-icon">♥</p>
+          <p class="empty-text">还没有喜欢的作品</p>
         </div>
       </template>
     </div>
@@ -123,7 +136,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '../store'
 import { formatNumber } from '../utils/format'
@@ -158,6 +171,23 @@ const handleFollow = async () => {
 // 私信（TODO：后端实现私信功能后接入）
 const handleMessage = () => {
   console.log('私信功能：待后端实现')
+}
+
+// 播放视频
+const playVideo = (video, tab) => {
+  // 确定要播放的视频列表
+  const targetList = tab === 'works' ? publishedVideos.value : likedVideos.value
+  // 找到视频在列表中的索引
+  const videoIndex = targetList.findIndex(v => v.id === video.id)
+  // 跳转到首页，并传递视频列表和当前索引
+  router.push({
+    path: '/',
+    query: {
+      fromProfile: 'true',
+      videoList: JSON.stringify(targetList),
+      currentIndex: videoIndex.toString()
+    }
+  })
 }
 
 // 处理触摸开始
@@ -220,12 +250,34 @@ const goBack = () => {
   router.back()
 }
 
-onMounted(async () => {
-  await userStore.fetchUserProfile(userId)
-})
-
 // 计算属性：用户资料
 const userProfile = computed(() => userStore.userProfile)
+
+// 计算属性：发布的视频列表
+const publishedVideos = computed(() => userStore.publishedVideos)
+
+// 计算属性：点赞的视频列表
+const likedVideos = computed(() => userStore.likedVideos)
+
+// 获取用户视频列表
+const fetchUserVideos = async () => {
+  if (activeTab.value === 'works') {
+    await userStore.fetchPublishedVideos(userId)
+  } else if (activeTab.value === 'likes') {
+    await userStore.fetchLikedVideos(userId)
+  }
+}
+
+// 监听标签变化，获取对应视频列表
+watch(activeTab, async (newTab) => {
+  await fetchUserVideos()
+})
+
+// 初始加载视频列表
+onMounted(async () => {
+  await userStore.fetchUserProfile(userId)
+  await fetchUserVideos()
+})
 </script>
 
 <style scoped>

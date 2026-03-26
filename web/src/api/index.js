@@ -1,7 +1,8 @@
 import axios from 'axios'
 
 const apiClient = axios.create({
-    baseURL: 'http://121.41.228.22:9999', //  网关地址
+//    baseURL: 'http://121.41.228.22:9999', //  网关地址
+    baseURL: 'http://localhost:9999',
     headers: {
         'Content-Type': 'application/json'
     }
@@ -31,9 +32,8 @@ export const api = {
         play: (videoId) => apiClient.get(`/content/video/play/${videoId}`),
 
         // 获取指定用户发布的视频列表
-        // 接口：GET /content/video/userList/{userId}
-        // TODO: 后端还没有该接口
-        getUserVideos: (userId) => apiClient.get(`/content/video/userList/${userId}`),
+        // 接口：GET /content/video/myVideos/{userId}
+        getUserVideos: (userId) => apiClient.get(`/content/video/myVideos/${userId}`),
 
         // 上传视频（包括封面）
         // 接口：POST /content/video/upload
@@ -72,10 +72,9 @@ export const api = {
             apiClient.get(`/content/like/likeCount/${videoId}`),
 
         // 获取用户点赞的视频列表
-        // 接口：GET /content/like/likedList/{userId}
-        // TODO: 后端还没有该接口
+        // 接口：GET /content/like/myLike/{userId}
         getLikedVideos: (userId) =>
-            apiClient.get(`/content/like/likedList/${userId}`)
+            apiClient.get(`/content/like/myLike/${userId}`)
     },
 
     // ================= 关注 =================
@@ -132,7 +131,7 @@ export const api = {
             apiClient.put('/user/info', data),
 
         // 头像上传 (假定接口路径，需后端实现配合)
-        // 接口：POST /user/avatar
+        // 接口：POST /content/video/avatar
         // 参数：file (MultipartFile)
         uploadAvatar: (formData) =>
             apiClient.post('/content/video/avatar', formData, {
@@ -144,20 +143,20 @@ export const api = {
     // TODO: 以下接口均需要后端实现后接入
     message: {
         // 获取和指定用户的私信列表
-        // 接口：GET /message/list/{targetUserId}
+        // 接口：GET /content/message/list/{targetUserId}
         getList: (targetUserId, params) =>
-            apiClient.get(`/message/list/${targetUserId}`, { params }),
+            apiClient.get(`/content/message/list/${targetUserId}`, { params }),
 
         // 发送私信
-        // 接口：POST /message/send
+        // 接口：POST /content/message/send
         // 请求体：{ targetUserId, content }
         send: (data) =>
-            apiClient.post('/message/send', data),
+            apiClient.post('/content/message/send', data),
 
         // 获取未读消息数
-        // 接口：GET /message/unread/count
+        // 接口：GET /content/message/unread/count
         getUnreadCount: () =>
-            apiClient.get('/message/unread/count')
+            apiClient.get('/content/message/unread/count')
     }
 }
 

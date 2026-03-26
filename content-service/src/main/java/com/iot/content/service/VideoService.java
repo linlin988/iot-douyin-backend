@@ -4,6 +4,7 @@ import com.iot.commonModules.common.Result;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.iot.commonModules.entity.User;
 import com.iot.commonModules.entity.Videos;
+import com.iot.content.VO.VideoVO;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -23,8 +24,8 @@ public interface VideoService {
     Videos getVideoDetail(Long videoId);
 
     //查询用户发布的所有视频
-    Result getUserWorksByUserId(Long userId);
-
+    List<VideoVO> getUserWorksByUserId(Long userId);
+  
     // 头像上传
     User uploadAvatar(MultipartFile file, Long userId) throws Exception;
 

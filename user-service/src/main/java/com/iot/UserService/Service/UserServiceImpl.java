@@ -24,8 +24,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import com.iot.UserService.Feign.VideoFeignClient;
-import com.iot.commonModules.common.Result;
+
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl extends com.baomidou.mybatisplus.extension.service.impl.ServiceImpl<UserMapper,User> implements UserService {
@@ -145,7 +144,7 @@ public class UserServiceImpl extends com.baomidou.mybatisplus.extension.service.
         String finalNickname = StringUtils.hasText(updateDTO.getNickname()) ? updateDTO.getNickname() : user.getUsername(); // 你实体类用的是username，数据库是nickname？需确认字段映射
         if (!finalAvatar.equals(user.getAvatar()) || !finalNickname.equals(user.getUsername())) {
             userMapper.updateUserInfo(userId, finalAvatar, finalNickname);
-            // 同步更新update_time（你原有代码有update_time字段）
+            // 同步更新update_time
             user.setUpdateTime(LocalDateTime.now());
             userMapper.updateById(user); // 仅更新时间，不影响其他字段
         }
@@ -169,37 +168,6 @@ public class UserServiceImpl extends com.baomidou.mybatisplus.extension.service.
         return user.getAvatar();
     }
 
-    @Autowired
-    private VideoFeignClient videoFeignClient; // 注入feign
-
-    // 查询用户作品
-    @Override
-    public List<String> getUserWorks(Long userId) {
-        Result result = videoFeignClient.getUserWorks(userId);
-        if (result == null || !"200".equals(result.getCode())) {
-            throw new RuntimeException("获取作品失败");
-        }
-        return (List<String>) result.getData();
-    }
-
-    // 查询用户点赞列表
-    @Override
-    public List<Long> getUserLikeList(Long userId) {
-        Result result = videoFeignClient.getUserLikeList(userId);
-        if (result == null || !"200".equals(result.getCode())) {
-            throw new RuntimeException("获取点赞列表失败");
-        }
-        return (List<Long>) result.getData();
-    }
-
-    @Override
-    public String getUsernameById(Long userId) {
-        User user = userMapper.selectById(userId);
-        if (user == null) {
-            throw new AllException("用户不存在", 400);
-        }
-        return user.getUsername();
-    }
 }
 
 

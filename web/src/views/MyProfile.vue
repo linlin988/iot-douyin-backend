@@ -2,7 +2,7 @@
   <div class="my-profile-container">
     <!-- 顶部导航 -->
     <div class="profile-nav">
-      <button class="back-btn" @click="router.back()">←</button>
+      <button class="back-btn" @click="goToHome">←</button>
       <h1 class="nav-title">我的</h1>
       <button class="logout-btn" @click="handleLogout">退出</button>
     </div>
@@ -143,7 +143,19 @@ const formatNum = (n) => {
 }
 
 const playVideo = (video) => {
-  router.push('/')
+  // 确定要播放的视频列表
+  const targetList = activeTab.value === 'published' ? publishedVideos.value : likedVideos.value
+  // 找到视频在列表中的索引
+  const videoIndex = targetList.findIndex(v => v.id === video.id)
+  // 跳转到首页，并传递视频列表和当前索引
+  router.push({
+    path: '/',
+    query: {
+      fromProfile: 'true',
+      videoList: JSON.stringify(targetList),
+      currentIndex: videoIndex.toString()
+    }
+  })
 }
 
 const triggerAvatarUpload = () => {
@@ -181,6 +193,10 @@ const handleLogout = () => {
   router.push('/login')
 }
 
+const goToHome = () => {
+  router.push('/')
+}
+
 const loadData = async () => {
   if (!currentUser.value) {
     await userStore.fetchCurrentUser()
@@ -213,6 +229,7 @@ onMounted(loadData)
   font-family: 'Noto Sans SC', sans-serif;
   overflow-y: auto;
   padding-bottom: 40px;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* 顶部导航 */
