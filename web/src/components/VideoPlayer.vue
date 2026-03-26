@@ -1,25 +1,30 @@
 <template>
   <div class="video-player-container" ref="containerRef" @touchstart="handleTouchStart" @touchmove="handleTouchMove" @touchend="handleTouchEnd" @keydown="handleKeydown" @wheel="handleWheel">
     <div class="video-list" :style="{ transform: `translateY(-${currentIndex * 100}vh)` }">
-      <div v-for="(video, index) in videoList" :key="video.id" class="video-item" ref="videoItems">
+      <div v-for="(video, index) in (videoList.length > 0 ? videoList : [{}])" :key="video.id || index" class="video-item" ref="videoItems">
         <video
+          v-if="video.videoUrl"
           :ref="el => { if (el) videoRefs[index] = el }"
           :src="video.videoUrl"
           :poster="video.coverUrl"
-          muted
+          :muted="isMuted"
           loop
           playsinline
           @canplay="handleCanPlay(index)"
         ></video>
+        <div v-else class="empty-video">
+          <div class="empty-icon">🎬</div>
+          <div class="empty-text">暂无视频</div>
+        </div>
         
         <!-- 视频内容覆盖层 -->
         <div class="video-overlay" @click="handleVideoClick(index)">
           <!-- 底部信息 -->
           <div class="bottom-info">
             <div class="author-info">
-              <img :src="video.author.avatar" alt="Avatar" class="avatar" @click.stop="goToAuthorProfile(video)" />
-              <span class="author-name">{{ video.author.name }}</span>
-              <button 
+              <img v-if="video.author?.avatar" :src="video.author.avatar" alt="Avatar" class="avatar" @click.stop="goToAuthorProfile(video)" />
+              <span v-if="video.author?.name" class="author-name">{{ video.author.name }}</span>
+              <button v-if="video.author?.id"
                 class="follow-btn" 
                 :class="{ 'following': video.author.isFollowing }"
                 @click.stop="handleFollow(video.author.id)"
@@ -27,11 +32,12 @@
                 {{ video.author.isFollowing ? '已关注' : '+ 关注' }}
               </button>
             </div>
-            <p class="description">{{ video.description }}</p>
+            <h3 v-if="video.title" class="video-title">{{ video.title }}</h3>
+            <p class="description">{{ video.description || '暂无描述' }}</p>
           </div>
           
           <!-- 右侧操作栏 -->
-          <div class="right-actions">
+          <div v-if="video.id" class="right-actions">
             <div class="action-item" @click.stop="handleLike(video.id)">
               <div class="action-icon" :class="{ 'liked': video.isLiked }">
                 <van-icon name="like" size="32" />
@@ -43,6 +49,12 @@
                 <van-icon name="chat-o" size="32" />
               </div>
               <span class="action-text">{{ formatNumber(video.comments) }}</span>
+            </div>
+            <div class="action-item" @click.stop="toggleMute">
+              <div class="action-icon">
+                <van-icon :name="isMuted ? 'volume-o' : 'volume'" size="32" />
+              </div>
+              <span class="action-text">{{ isMuted ? '静音' : '声音' }}</span>
             </div>
             <div class="action-item" @click.stop="handleShare(video.id)">
               <div class="action-icon">
@@ -117,6 +129,10 @@ const props = defineProps({
   videoList: {
     type: Array,
     default: () => []
+  },
+  currentIndex: {
+    type: Number,
+    default: 0
   }
 })
 
@@ -129,13 +145,14 @@ const userStore = useUserStore()
 const containerRef = ref(null)
 const videoItems = ref([])
 const videoRefs = ref({})
-const currentIndex = ref(0)
+const currentIndex = ref(props.currentIndex)
 const touchStartY = ref(0)
 const touchEndY = ref(0)
 const showLikeAnimation = ref(false)
 const showCommentsPopup = ref(false)
 const commentInput = ref('')
 const page = ref(1)
+const isMuted = ref(true)
 
 const comments = ref([])
 
@@ -174,6 +191,11 @@ const handleTouchEnd = async () => {
     emit('videoChange', currentIndex.value)
     playCurrentVideo()
   }
+  // 检查是否滑到了最后一个视频
+  if (currentIndex.value === props.videoList.length - 1 && !videoStore.isLoading && videoStore.hasMore) {
+    page.value++
+    await videoStore.fetchVideoList(page.value, true)
+  }
 }
 
 // 处理视频点击（暂停/播放）
@@ -183,6 +205,13 @@ const handleVideoClick = (index) => {
     if (video) {
       if (video.paused) {
         video.play()
+        // 调用播放量接口
+        const videoData = props.videoList[index]
+        if (videoData?.id) {
+          api.video.play(videoData.id).catch(error => {
+            console.error('播放量统计失败:', error)
+          })
+        }
       } else {
         video.pause()
       }
@@ -214,6 +243,15 @@ const handleFollow = async (userId) => {
     return
   }
   await videoStore.toggleFollow(userId)
+}
+
+// 切换静音状态
+const toggleMute = () => {
+  isMuted.value = !isMuted.value
+  const currentVideo = videoRefs.value[currentIndex.value]
+  if (currentVideo) {
+    currentVideo.muted = isMuted.value
+  }
 }
 
 // 显示评论
@@ -335,8 +373,16 @@ const playCurrentVideo = () => {
   // 播放当前视频
   const currentVideo = videoRefs.value[currentIndex.value]
   if (currentVideo) {
+    currentVideo.muted = isMuted.value
     currentVideo.play()
     verifyStatus()
+    // 调用播放量接口
+    const video = props.videoList[currentIndex.value]
+    if (video?.id) {
+      api.video.play(video.id).catch(error => {
+        console.error('播放量统计失败:', error)
+      })
+    }
   }
 }
 
@@ -345,7 +391,15 @@ const handleCanPlay = (index) => {
   if (index === currentIndex.value) {
     const video = videoRefs.value[index]
     if (video) {
+      video.muted = isMuted.value
       video.play()
+      // 调用播放量接口
+      const videoData = props.videoList[index]
+      if (videoData?.id) {
+        api.video.play(videoData.id).catch(error => {
+          console.error('播放量统计失败:', error)
+        })
+      }
     }
   }
 }
@@ -369,6 +423,16 @@ watch(() => props.videoList, () => {
     playCurrentVideo()
   })
 }, { deep: true })
+
+// 监听currentIndex变化
+watch(() => props.currentIndex, (newIndex) => {
+  if (newIndex !== currentIndex.value) {
+    currentIndex.value = newIndex
+    videoStore.setCurrentVideoIndex(newIndex)
+    emit('videoChange', newIndex)
+    playCurrentVideo()
+  }
+})
 
 // 处理键盘事件
 const handleKeydown = (e) => {
@@ -564,9 +628,42 @@ video {
   background-color: rgba(255,255,255,0.3);
 }
 
+.video-title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #fff;
+}
+
 .description {
   font-size: 14px;
   line-height: 1.5;
+}
+
+/* 空视频状态 */
+.empty-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #111;
+  z-index: -1;
+}
+
+.empty-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-text {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .right-actions {

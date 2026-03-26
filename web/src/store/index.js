@@ -19,29 +19,21 @@ export const useVideoStore = defineStore('video', {
                 if (apiData.code === 200) {
                     const records = apiData.data.records || []
                     const userIds = [...new Set(records.map(record => record.userId).filter(Boolean))]
-                    const avatarMap = {}
-                    const usernameMap = {}
+                    const userInfoMap = {}
 
                     await Promise.all(
                         userIds.map(async (userId) => {
                             try {
-                                const avatarRes = await api.user.getAvatarById(userId)
-                                const avatarUrl = avatarRes?.data?.data || ''
-                                if (avatarUrl) {
-                                    avatarMap[userId] = avatarUrl
+                                const userRes = await api.user.getInfo(userId)
+                                if (userRes?.data?.code === 200 && userRes?.data?.data) {
+                                    const userInfo = userRes.data.data
+                                    userInfoMap[userId] = {
+                                        username: userInfo.username || '',
+                                        avatar: userInfo.avatar || ''
+                                    }
                                 }
                             } catch (e) {
-                                console.error('fetch avatar error:', e)
-                            }
-
-                            try {
-                                const usernameRes = await api.user.getUsernameById(userId)
-                                const username = usernameRes?.data?.data || ''
-                                if (username) {
-                                    usernameMap[userId] = username
-                                }
-                            } catch (e) {
-                                console.error('fetch username error:', e)
+                                console.error('fetch user info error:', e)
                             }
                         })
                     )
@@ -52,13 +44,14 @@ export const useVideoStore = defineStore('video', {
                         coverUrl: record.coverUrl?.replace(/`/g, ''),
                         author: {
                             id: record.userId,
-                            name: usernameMap[record.userId] || String(record.userId),
-                            avatar: avatarMap[record.userId] || '',
+                            name: userInfoMap[record.userId]?.username || String(record.userId),
+                            avatar: userInfoMap[record.userId]?.avatar || '',
                             isFollowing: false
                         },
-                        description: record.description || record.title || `视频 ${index + 1}`,
-                        likes: record.likeCount,
-                        comments: record.commentCount,
+                        title: record.title || `视频 ${index + 1}`,
+                        description: record.description || '',
+                        likes: Number(record.likeCount) || 0,
+                        comments: Number(record.commentCount) || 0,
                         shares: 0,
                         isLiked: false
                     }))
@@ -89,7 +82,8 @@ export const useVideoStore = defineStore('video', {
                 await api.like.toggle(videoId)
 
                 video.isLiked = !video.isLiked
-                video.likes += video.isLiked ? 1 : -1
+                // 确保 likes 是数字类型
+                video.likes = Number(video.likes) + (video.isLiked ? 1 : -1)
             } catch (e) {
                 console.error('toggleLike error:', e)
             }
@@ -192,8 +186,8 @@ export const useUserStore = defineStore('user', {
                         name: user.username,
                         avatar: user.avatar || '',
                         bio: user.bio || '',
-                        followers: user.followerCount || 0,
-                        following: user.followingCount || 0,
+                        followers: user.fanCount || 0,
+                        following: user.followCount || 0,
                         isFollowing: false,
                         videos: []
                     }
@@ -242,12 +236,21 @@ export const useUserStore = defineStore('user', {
         },
 
         // 获取我发布的视频
-        // TODO: 依赖后端接口 GET /content/video/userList/{userId}，若接口未实现则返回空数组
         async fetchPublishedVideos(userId) {
             try {
                 const res = await api.video.getUserVideos(userId)
                 if (res.data.code === 200) {
-                    this.publishedVideos = res.data.data?.records || res.data.data || []
+                    const videos = res.data.data || []
+                    // 处理视频数据，确保字段格式正确
+                    this.publishedVideos = videos.map(video => ({
+                        id: video.id,
+                        coverUrl: video.coverUrl?.replace(/`/g, '') || '',
+                        likeCount: Number(video.likeCount) || 0,
+                        commentCount: Number(video.commentCount) || 0,
+                        title: video.title || '',
+                        description: video.description || '',
+                        videoUrl: video.videoUrl?.replace(/`/g, '') || ''
+                    }))
                 }
             } catch (e) {
                 console.error('fetchPublishedVideos error:', e)
@@ -256,12 +259,21 @@ export const useUserStore = defineStore('user', {
         },
 
         // 获取我点赞的视频
-        // TODO: 依赖后端接口 GET /content/like/likedList/{userId}，若接口未实现则返回空数组
         async fetchLikedVideos(userId) {
             try {
                 const res = await api.like.getLikedVideos(userId)
                 if (res.data.code === 200) {
-                    this.likedVideos = res.data.data?.records || res.data.data || []
+                    const videos = res.data.data || []
+                    // 处理视频数据，确保字段格式正确
+                    this.likedVideos = videos.map(video => ({
+                        id: video.id,
+                        coverUrl: video.coverUrl?.replace(/`/g, '') || '',
+                        likeCount: Number(video.likeCount) || 0,
+                        commentCount: Number(video.commentCount) || 0,
+                        title: video.title || '',
+                        description: video.description || '',
+                        videoUrl: video.videoUrl?.replace(/`/g, '') || ''
+                    }))
                 }
             } catch (e) {
                 console.error('fetchLikedVideos error:', e)

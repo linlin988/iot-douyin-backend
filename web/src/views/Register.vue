@@ -256,7 +256,7 @@ onMounted(() => {
 .captcha-group { gap: 0; }
 .captcha-input { min-width: 0; }
 .captcha-img-wrap { flex-shrink: 0; cursor: pointer; border-left: 1px solid rgba(255,255,255,0.1); border-radius: 0 12px 12px 0; overflow: hidden; }
-.captcha-img { display: block; height: 38px; width: 100px; object-fit: contain; background: #fff; }
+.captcha-img { display: block; height: 48px; width: 120px; object-fit: cover; background: #fff; }
 
 .strength-bar-wrap {
   display: flex; align-items: center; gap: 10px; padding: 0 2px;

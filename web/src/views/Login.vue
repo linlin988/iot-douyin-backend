@@ -285,9 +285,9 @@ onMounted(() => {
 }
 .captcha-img {
   display: block;
-  height: 38px;
-  width: 100px;
-  object-fit: contain;
+  height: 48px;
+  width: 120px;
+  object-fit: cover;
   background: #fff;
 }
 

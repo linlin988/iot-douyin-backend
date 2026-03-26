@@ -105,6 +105,14 @@ public class VideoController {
         }
         return Result.error("头像上传失败");
     }
+
+    @GetMapping("/play/{videoId}")
+    public Result playVideo(@PathVariable Long videoId) {
+        // 获取当前登录用户ID
+        Long userId = UserContext.getUser();
+        videoService.recordPlayRedis(videoId, userId);
+        return Result.success();
+    }
 }
 
 

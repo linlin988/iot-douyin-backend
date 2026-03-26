@@ -14,17 +14,24 @@ import com.iot.content.config.AliyunOSSOperator;
 import com.iot.content.mapper.UserMapper;
 import com.iot.content.mapper.VideoMapper;
 import com.iot.content.service.VideoService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Set;
 import java.util.UUID;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.concurrent.TimeUnit;
 
+import static cn.hutool.core.lang.Console.log;
 
+@Slf4j
 @Service
 public class VideoServiceImpl implements VideoService {
 
@@ -185,4 +192,66 @@ public class VideoServiceImpl implements VideoService {
         return null;
     }
 
+    /**
+     * Redis记录播放（防重复 + 最多+1）
+     */
+    @Override
+    public void recordPlayRedis(Long videoId, Long userId) {
+        if (videoId == null || userId == null) {
+            return;
+        }
+
+        // 1. 用户去重KEY：24小时内同一个用户只记一次
+        String userPlayKey = "video:play:user:" + userId + ":" + videoId;
+        // 2. 视频增量KEY
+        String videoIncrKey = "video:play:incr:" + videoId;
+
+        // 原子判断：如果用户没播放过，才执行+1
+        Boolean ifAbsent = stringRedisTemplate.opsForValue()
+                .setIfAbsent(userPlayKey, "1", 24, TimeUnit.HOURS);
+
+        // true = 首次播放 → Redis播放量+1
+        // 注意：这里用increment，天然线程安全
+        if (Boolean.TRUE.equals(ifAbsent)) {
+            stringRedisTemplate.opsForValue().increment(videoIncrKey, 1);
+        }
+        // 已播放过 → 不做任何操作
+    }
+
+    /**
+     * 每小时执行一次：0 0 * * * ?
+     * 同步Redis播放量到数据库
+     */
+    @Scheduled(cron = "0 0 * * * ?")
+    public void syncPlayCountToDB() {
+        // 1. 匹配所有待同步的视频播放增量KEY
+        String pattern = "video:play:incr:*";
+        Set<String> keys = stringRedisTemplate.keys(pattern);
+
+        if (CollectionUtils.isEmpty(keys)) {
+            return;
+        }
+
+        // 2. 批量同步到数据库
+        for (String key : keys) {
+            try {
+                // 提取视频ID
+                Long videoId = Long.parseLong(key.split(":")[3]);
+                // 获取Redis中的增量
+                String incrStr = stringRedisTemplate.opsForValue().get(key);
+                if (incrStr == null || Long.parseLong(incrStr) <= 0) {
+                    stringRedisTemplate.delete(key);
+                    continue;
+                }
+
+                // 3. 数据库播放量 + 增量
+                videoMapper.addPlayCount(videoId, Long.parseLong(incrStr));
+
+                // 4. 同步完成，删除Redis增量记录
+                stringRedisTemplate.delete(key);
+            } catch (Exception e) {
+                log.error("视频播放量同步失败", e);
+            }
+        }
+    }
 }
