@@ -11,7 +11,7 @@ RUN groupadd -r appuser && useradd -r -g appuser appuser \
 USER appuser
 
 
-COPY target/gateway-service-0.0.1-SNAPSHOT.jar app.jar
+COPY target/gateway-service-0.0.2-SNAPSHOT.jar app.jar
 
 EXPOSE 9999
 

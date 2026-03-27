@@ -54,11 +54,10 @@ public class LikeController {
      * @return 查看用户点赞列表（返回视频封面以及视频id）
      */
     @Operation(summary = "查看用户点赞列表（返回视频封面以及视频id）")
-    @GetMapping("/myLike")
-    public Result getUserLikeList() {
-        Long userId = UserContext.getUser();
+    @GetMapping("/myLike/{userId}")
+    public Result getUserLikeList(@PathVariable Long userId) {
         List<VideoVO> likeList = likeService.getUserLikeVideoList(userId);
-        if (likeList == null) {
+        if (likeList == null || likeList.isEmpty()) {
             return Result.success("用户未点赞任何视频");
         }
         return Result.success("查询点赞列表成功", likeList);

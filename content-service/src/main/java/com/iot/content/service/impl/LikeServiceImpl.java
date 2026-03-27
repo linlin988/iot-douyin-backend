@@ -197,7 +197,7 @@ public class LikeServiceImpl extends ServiceImpl<LikeMapper, Likes> implements I
                 .in("id", videoIdList).orderByDesc("create_time"));
 
         List<VideoVO> videoVOList = videoList.stream()
-                .map(v -> new VideoVO(v.getId(), v.getVideoUrl()))
+                .map(v -> new VideoVO(v.getId(), v.getVideoUrl(), v.getCoverUrl(), v.getTitle(), v.getDescription(), v.getLikeCount(), v.getCommentCount()))
                 .collect(Collectors.toList());
 
 

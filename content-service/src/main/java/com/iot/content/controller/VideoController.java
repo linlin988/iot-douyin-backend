@@ -78,13 +78,12 @@ public class VideoController {
     }
 
    // 查询当前用户发布的视频列表（给用户服务调用）
-    @Operation(summary = "根据用户ID查询该用户发布的所有视频")
-    @GetMapping("/myVideos")
-    public Result getUserWorksByUserId() {
-        Long userId = UserContext.getUser();
-        List<VideoVO> videoList = videoService.getUserWorksByUserId(userId);
-        return Result.success(videoList);
-    }
+   @Operation(summary = "根据用户ID查询该用户发布的所有视频")
+   @GetMapping("/myVideos/{userId}")  // 路径加上 {userId}
+   public Result getUserWorksByUserId(@PathVariable Long userId) {  // 接收前端传的ID
+       List<VideoVO> videoList = videoService.getUserWorksByUserId(userId);
+       return Result.success(videoList);
+   }
 
     //上传头像
     @Operation(summary = "根据用户ID上传头像")
