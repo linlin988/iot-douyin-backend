@@ -164,7 +164,7 @@ public class VideoServiceImpl implements VideoService {
         List<Videos> videoList = videoMapper.selectList(queryWrapper);
 
          return videoList.stream().map(v->
-                 new VideoVO(v.getId(),v.getVideoUrl()))
+                 new VideoVO(v.getId(), v.getVideoUrl(), v.getCoverUrl(), v.getTitle(), v.getDescription(), v.getLikeCount(), v.getCommentCount()))
                  .collect(Collectors.toList());
     }
 

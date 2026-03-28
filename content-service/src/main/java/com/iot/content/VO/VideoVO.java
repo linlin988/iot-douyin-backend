@@ -23,4 +23,25 @@ public class VideoVO {
      */
     @TableField(value = "video_url")
     private String videoUrl;
+    /**
+     * 视频封面地址
+     */
+    @TableField(value = "cover_url")
+    private String coverUrl;
+    /**
+     * 视频标题
+     */
+    private String title;
+    /**
+     * 视频描述
+     */
+    private String description;
+    /**
+     * 点赞数
+     */
+    private Long likeCount;
+    /**
+     * 评论数
+     */
+    private Long commentCount;
 }

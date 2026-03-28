@@ -5,11 +5,11 @@
     <parent>
         <groupId>com.iot</groupId>
         <artifactId>iot-douyin</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.0.2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>gateway-service</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
     <name>gateway-service</name>
     <description>gateway-service</description>
     <url/>
@@ -82,6 +82,18 @@
         <dependency>
             <groupId>com.github.xiaoymin</groupId>
             <artifactId>knife4j-gateway-spring-boot-starter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.iot</groupId>
+            <artifactId>commonModules</artifactId>
+            <version>0.0.2-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-web</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
 

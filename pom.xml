@@ -5,7 +5,7 @@
 
     <groupId>com.iot</groupId>
     <artifactId>iot-douyin</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>iot-douyin</name>
     <description>iot-douyin</description>

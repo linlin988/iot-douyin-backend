@@ -14,7 +14,7 @@
         ></video>
         <div v-else class="empty-video">
           <div class="empty-icon">🎬</div>
-          <div class="empty-text">暂无视频</div>
+          <div class="empty-text">视频加载中...登录以享受全部功能</div>
         </div>
         
         <!-- 视频内容覆盖层 -->

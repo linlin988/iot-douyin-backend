@@ -1,8 +1,8 @@
 import axios from 'axios'
 
 const apiClient = axios.create({
-//    baseURL: 'http://121.41.228.22:9999', //  网关地址
-    baseURL: 'http://localhost:9999',
+    baseURL: 'http://121.41.228.22:9999', //  网关地址
+//    baseURL: 'http://localhost:9999',
     headers: {
         'Content-Type': 'application/json'
     }
